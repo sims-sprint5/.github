@@ -131,48 +131,55 @@ git commit -m "feat(tickets): add filtering by status"
 git commit -m "fix(auth): resolve token expiration"
 ```
 
-## Procés de Pull Request
+---
 
-### Abans de Presentar
+# Pull Request Process
+    
+---
 
-1. Sincronitzar amb main:
-   ```bash
-   git fetch origin
-   git rebase origin/main
-   ```
+## 1️⃣ Preparació abans de crear la PR
 
-2. Provar localment:
-   ```bash
-   npm run dev
-   npm run build
-   npm run preview
-   ```
+Abans de crear una PR, **assegura’t que totes les funcionalitats que afecten els teus canvis funcionen correctament**. Això evita errors en `develop` i facilita la revisió.
 
-3. Revisar els canvis
+### 1.1 Sincronitzar amb develop
 
-### Crear PR
+Actualitza la teva branca amb la darrera versió de `develop`:
 
-Usar un títol clar seguint el format de commit:
-```
+```bash
+git pull (dins de la branca develop) o git fetch origin develop (si no troba la branca del git)
+
+### 2.1 Títol de la Pull Request
+
+El títol de la PR és molt important: ha de ser clar, descriptiu i seguir un format uniforme per facilitar la lectura i revisió.
+
+- `<type>`: tipus del canvi
+- `<scope>`: àrea o mòdul afectat
+- `<missatge>`: explicació breu del canvi
+
+---
+
+## Tipus permesos
+
+- `feat` → nova funcionalitat
+- `fix` → correcció de bug
+- `refactor` → refactorització de codi
+- `docs` → documentació
+- `style` → canvis d’estil o format (no funcional)
+- `perf` → millores de rendiment
+- `test` → afegir/modificar tests
+- `chore` → tasques generals (configs, scripts, etc.)
+
+---
+
+## Exemples de títols correctes
 feat(tickets): add filtering by status
 fix(auth): resolve token refresh issue
-```
+refactor(users): extract validation logic
+docs(readme): update installation instructions
+---
 
-Omplir la plantilla de PR:
-- **Descripció**: Què i per què
-- **Tipus**: Feature / Correccio de bug / Docs
-- **Prova**: Com provar
-- **Capturas**: Si és necessari canvis a la UI
+## Format obligatori
 
-## Millors Pràctiques
-
-1. **Mantenir PRs enfocats** – una funcionalitat/correció per PR
-2. **Commits petits i lògics** – més fàcils de revisar i revertir
-3. **Importar traduccions** – afegir claus a tots els fitxers de locale
-4. **Gestionar errors** – try/catch, mostrar toasts/missatges
-5. **Usar composables** – lògica reutilitzable, no duplicada
-6. **Provar tots els estats** – loading, buit, error, éxito
-7. **Tipar tot** – evitar `any`
 
 ## Altres
 
