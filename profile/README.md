@@ -103,20 +103,40 @@ resources/
 
 ## Flux de Treball Git
 
-### Noms de Branques
+---
 
-```
-<type>/<issue>-<description>
-```
+## 📌 Procés per Crear una Branca
 
-Tipus: `feature/`, `bugfix/`, `docs/`, `refactor/`, `perf/`
+En aquest projecte, **cada nova funcionalitat, correcció o millora s’ha de desenvolupar en una branca independent**.  
 
-Exemples:
+No es permet treballar directament sobre `develop`.
+
+Això garanteix:
+
+- Estabilitat de la branca `develop`
+- Treball en paral·lel sense conflictes
+- Traçabilitat de cada canvi
+- Revisió de codi controlada mitjançant Pull Requests
+
+---
+
+### 1️⃣ Abans de Crear la Branca
+
+Abans de crear una branca nova:
+
+- Ha d’existir un **identificador associat** (ex: `BK-12`)
+- S’ha de tenir clara la descripció del canvi
+- La branca ha de correspondre a **una sola funcionalitat o correcció**
+
+---
+
+### 2️⃣ Actualitzar `develop`
+
+Sempre s’ha de partir de l’última versió estable del projecte.
+
 ```bash
-git checkout -b feature/BK-12
-git checkout -b bugfix/456-fix-login
-```
-
+git checkout develop
+git pull origin develop
 ### Missatges de Commit
 
 ```
