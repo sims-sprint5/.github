@@ -45,7 +45,9 @@ Desprès he de configurar 'config/tenanacy.php' i ajustar la configuraciñi per 
 
 ### Pendent
 
-Revisar pas 4 -->
+1. Acabar de modificar /config/tenancy.php.
+
+2. Revisar pas 4 -->
 
 Pas 4: Configurar el Creador de Bases de Dades
 El paquet necessita un usuari de base de dades amb permisos per crear altres bases de dades. Assegura't que l'usuari de la teva connexió principal (central_connection) tingui el privilegi CREATE DATABASE.
