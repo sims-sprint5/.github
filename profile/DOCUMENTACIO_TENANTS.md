@@ -12,7 +12,8 @@ Desprès he de configurar 'config/tenanacy.php' i ajustar la configuraciñi per 
 
 ---
 
-´´´
+```php
+
 // config/tenancy.php
 
 'tenant_database_manager' => Stancl\Tenancy\TenantDatabaseManagers\MySQLDatabaseManager::class, // O PostgreSQLDatabaseManager si fas servir Postgres
@@ -40,7 +41,7 @@ Desprès he de configurar 'config/tenanacy.php' i ajustar la configuraciñi per 
     // '--path' => [database_path('seeders/tenant')], // Si tens seeders separats
 ],
 
-´´´
+```
 
 ### Pendent
 
