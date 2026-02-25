@@ -205,3 +205,19 @@ docs(readme): update installation instructions
 
 Si realitzem alguna refactorització o canvi documentar-ho i explicar perquè.
 Si ens trobem algun error documentar-lo i documentar com ho hem sol·lucionat.
+
+## 📘 Convenció de Codi per a Classes
+
+Les classes del projecte han de seguir les següents normes per mantenir un codi net, llegible i escalable.
+
+### ✅ Format dels Noms de Classes
+
+- Utilitzar **PascalCase**
+- El nom ha de ser **descriptiu** i representar clarament la responsabilitat de la classe
+- Evitar abreviacions no estàndard
+
+Exemples correctes:
+- UserController
+- VehicleService
+- TicketRepository
+- GeofenceValidator
