@@ -69,19 +69,3 @@ Té tot el que pot fer un usuari i, a més:
 ✔ Accedir a auditoria i logs complets.
 
 ---
-
-## 📊 Resum
-
-- **Usuari** → Usa el sistema (reserves, vehicles i tickets propis).  
-- **Admin** → Gestiona contingut, vehicles, tickets i usuaris normals.  
-- **Super Admin** → Té control total del sistema.
-
----
-
-Si vols, et puc fer també:
-✅ Versió encara més simple (per explicar a un client)  
-✅ Versió tècnica per documentació de programació  
-✅ Diagrama de permisos  
-✅ Explicació per presentació oral  
-
-Només digues 👍
