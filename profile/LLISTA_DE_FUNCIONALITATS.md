@@ -16,6 +16,32 @@ Aquest document explica **de manera molt fàcil** què pot fer cada tipus d’us
 
 ❌ No pot gestionar altres usuaris ni el sistema.
 
+### Endpoints
+
+🔑 AUTENTICACIÓ
+- `POST /api/v1/auth/register`
+- `POST /api/v1/auth/login`
+- `POST /api/v1/auth/logout`
+- `GET /api/v1/auth/me`
+- `POST /api/v1/auth/change-password`
+
+🚙 VEHICLES
+- `GET /api/v1/vehicles`
+- `GET /api/v1/vehicles/{id}`
+
+📅 RESERVES
+- `GET /api/v1/reservations` *(només pròpies)*
+- `GET /api/v1/reservations/{id}` *(només pròpia)*
+- `POST /api/v1/reservations`
+- `PUT /api/v1/reservations/{id}` *(només pròpia)*
+- `DELETE /api/v1/reservations/{id}` *(cancel·lar pròpia)*
+- `GET /api/v1/reservations/user/{userId}` *(només el seu ID)*
+
+🎫 TICKETS
+- `GET /api/v1/tickets` *(només propis)*
+- `GET /api/v1/tickets/{id}` *(només propi)*
+- `POST /api/v1/tickets`
+
 ---
 
 ## 🛠️ Admin
@@ -56,16 +82,104 @@ Té tot el que pot fer un usuari i, a més:
 ✔ Veure estadístiques del sistema.  
 ✔ Reassignar vehicles si hi ha problemes.
 
+
+### Endpoints
+
+👥 USUARIS
+- `GET /api/v1/users`
+- `GET /api/v1/users/{id}`
+- `POST /api/v1/users`
+- `PUT /api/v1/users/{id}`
+- ❌ No pot eliminar admins o super admins
+
+🚙 VEHICLES
+- `GET /api/v1/vehicles`
+- `GET /api/v1/vehicles/{id}`
+- `POST /api/v1/vehicles`
+- `PUT /api/v1/vehicles/{id}`
+- `DELETE /api/v1/vehicles/{id}`
+- `GET /api/v1/vehicles/{id}/reservations`
+- `PATCH /api/v1/vehicles/{id}/location`
+
+📅 RESERVES
+- `GET /api/v1/reservations`
+- `GET /api/v1/reservations/{id}`
+- `GET /api/v1/reservations/user/{userId}`
+- `PATCH /api/v1/reservations/{id}/status`
+
+🎫 TICKETS
+- `GET /api/v1/tickets`
+- `GET /api/v1/tickets/{id}`
+- `PUT /api/v1/tickets/{id}`
+- `DELETE /api/v1/tickets/{id}`
+- `PATCH /api/v1/tickets/{id}/assign`
+- `PATCH /api/v1/tickets/{id}/status`
+
+🗺️ GEOFENCING
+- `GET /api/v1/geofences`
+- `GET /api/v1/geofences/{id}`
+- `GET /api/v1/geofences/{id}/logs`
+- `POST /api/v1/geofences/check-vehicle`
 ---
 
 ## 👑 Super Admin
 
-👉 És el màxim nivell del sistema.
+👉 És l'administrador  de totes les Companyies (Tenants)
 
-✔ Pot fer tot el que fa un admin.  
-✔ Crear administradors i super administradors.  
-✔ Eliminar administradors o super administradors.  
-✔ Gestionar configuracions globals.  
-✔ Accedir a auditoria i logs complets.
+✔ Crear, modificar i eliminar administradors i super administradors.  
+✔ Crear companyies.  
+✔ Modificar companyies.  
+✔ Eliminar companyies.
+
+
+### Endpoints
+
+👥 ADMINISTRADORS
+- `GET /api/v1/admins`
+- `GET /api/v1/admins/{id}`
+- `POST /api/v1/admins`
+- `PUT /api/v1/admins/{id}`
+- `DELETE /api/v1/admins/{id}`
+
+👥 SUPERADMINISTRADORS
+- `GET /api/v1/superadmins`
+- `GET /api/v1/superadmins/{id}`
+- `POST /api/v1/superadmins`
+- `PUT /api/v1/superadmins/{id}`
+- `DELETE /api/v1/superadmins/{id}`
+
+🏢 COMPANYIES
+- `GET /api/v1/companies`
+- `GET /api/v1/companies/{id}`
+- `POST /api/v1/companies`
+- `PUT /api/v1/companies/{id}`
+- `DELETE /api/v1/companies/{id}`
 
 ---
+
+# 📊 Matriu Resum de Permisos
+
+### LLEGENDA  
+✅ Total: Accés complet.  
+👤 Parcial: Només sobre dades pròpies.  
+❌ Cap: Sense accés.  
+
+| Funcionalitat / Recurs           | Usuari  | Admin   | Super Admin |
+|----------------------------------|:-------:|:-------:|:-----------:|
+| Autenticació (Login/Register)    | ✅      | ✅       | ✅       |
+| Veure Vehicles                   | ✅      | ✅       | ❌       |
+| Gestionar Vehicles (CRUD)        | ❌      | ✅       | ❌       |
+| Crear/Gestionar Reserves         | 👤      | ✅       | ❌       |
+| Gestionar Tickets (Incidències)  | 👤      | ✅       | ❌       |
+| Geofencing i Logs Operatius      | ❌      | ✅       | ❌       |
+| Gestionar Usuaris (Clients)      | ❌      | ✅       | ❌       |
+| Gestionar Administradors         | ❌      | ❌       | ✅       |
+| Gestionar Super Administradors   | ❌      | ❌       | ✅       |
+| Gestionar Companyies (Tenants)   | ❌      | ❌       | ✅       |
+
+---
+
+
+**Versió:** 1.0  
+**Última actualització:** 26/02/2026
+
