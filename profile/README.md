@@ -176,6 +176,8 @@ El títol de la PR és molt important: ha de ser clar, descriptiu i seguir un fo
 - `<scope>`: àrea o mòdul afectat
 - `<missatge>`: explicació breu del canvi
 
+```
+
 ---
 
 ## Tipus permesos
@@ -221,3 +223,9 @@ Exemples correctes:
 - VehicleService
 - TicketRepository
 - GeofenceValidator
+
+---
+
+# Quan fer merge amb la branca main
+
+Quan l'Alpha estigui preparada a la branca develop ja podrem fer el merge cap a la branca main.
