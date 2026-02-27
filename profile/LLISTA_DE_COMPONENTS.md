@@ -13,7 +13,7 @@ El projecte està organitzat seguint una arquitectura modular i escalable, difer
 
 ## Layouts
 
-- `AppLayout` — Estructura principal de l'aplicació - src/layouts/AppLayout.vue  
+- `AppLayout` — Estructura principal de l'aplicació (unio de Navbar i SideBar) - src/layouts/AppLayout.vue  
 - `Navbar` — Barra de navegació superior - src/layouts/components/Navbar.vue  
 - `Sidebar` — Menú lateral de navegació - src/layouts/components/Sidebar.vue  
 - `LanguageSelector` — Selector d'idioma de la UI - src/components/LanguageSelector.vue  
