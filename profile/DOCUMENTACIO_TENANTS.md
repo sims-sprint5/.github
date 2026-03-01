@@ -1,69 +1,82 @@
 ## Documentació tenants
 
-Per fer que els models siguin tenant-aware he afegir la columna "tenant_id" a les taules.
+### Requisits dels tenants
 
-### Actualització
+- Base de dades amb esquemes x tenant.
+- Identificació dels Tenants segons el domini.
 
-He desfet aquesta modificació ja que aquesta serveix quan tenim una base de dades amb diferents esquemes per a cada tenant (companyia)!
 
-El que he de fer és crear una nova carpeta 'database/migrations/tenant', i moure totes les migracions que utilitzen tenant a aquesta.
+### Procediment
 
-Desprès he de configurar 'config/tenanacy.php' i ajustar la configuraciñi per a la creació de bases de dades.
+1. /config/tenancy.php
 
----
+Línia 47 — Canviar tenant_database_manager de MySQLDatabaseManager a PostgreSQLSchemaManager::class. Això indica al paquet que creï esquemes dins la mateixa BD en comptes de bases de dades noves.
+Línia 73 — Al bloc database.managers.pgsql, comentar PostgreSQLDatabaseManager i descomentar PostgreSQLSchemaManager. Aquesta és la línia que realment s'utilitza per gestionar la creació/eliminació d'esquemes.
+Línia 63 — Canviar prefix de 'tenant' a 'tenant_' (amb guió baix) perquè els esquemes es diguin tenant_abc123 en lloc de tenantabc123.
+
+2. Crear el Tenant model.
+
+3. Moure migracions que utilitzen tenants de /migrations a /migrations/tenant
+
+
+4. Moure rutes API de /routes/api.php a /routes/tenant.php
+
+5. A TenancyServiceProvider.php:139-149, el mètode makeTenancyMiddlewareHighestPriority() usa Illuminate\Contracts\Http\Kernel que ja no existeix a Laravel 12 (que usa app.php). Cal:
+
+Eliminar el mètode makeTenancyMiddlewareHighestPriority() del TenancyServiceProvider.
+Afegir la prioritat de middleware directament a app.php dins del callback withMiddleware, usant $middleware->priority([...]) o $middleware->prepend(...).
+
+6. He corretgit les variables d'entorn dels Subdominis
+
+Al fitxer .env he afegit/modificat:
+
+SESSION_DOMAIN=.localhost — Perquè les cookies funcionin entre subdominis.
+SANCTUM_STATEFUL_DOMAINS=localhost,*.localhost — Perquè Sanctum reconegui peticions des de subdominis com a stateful.
+Verificar que DB_CONNECTION=pgsql, DB_DATABASE=sims, i les credencials de PostgreSQL coincideixen amb el docker-compose.yml.
+
+7. Canvi al document docker-compose.yml
+
+environment:
+  DB_HOST: 127.0.0.1 per postgres.
+
+  Per què postgres? Dins de la xarxa Docker (sims_network), els contenidors es comuniquen pel nom del servei definit al docker-compose.yml, no per IP. El servei de base de dades es diu postgres.
+
+### Proves
+
+1. Crear tenant
 
 ```php
+> $tenant = \App\Models\Tenant::create(['id' => 'empresa1']);
 
-// config/tenancy.php
-
-'tenant_database_manager' => Stancl\Tenancy\TenantDatabaseManagers\MySQLDatabaseManager::class, // O PostgreSQLDatabaseManager si fas servir Postgres
-
-'database' => [
-    'central_connection' => env('DB_CONNECTION', 'mysql'), // La teva connexió central
-
-    // Aquest és el prefix per a les bases de dades dels tenants
-    'prefix' => 'tenant_',
-    'suffix' => '',
-
-    // Aquesta és la connexió que s'usarà com a "plantilla"
-    // El paquet copiarà aquesta configuració i només canviarà el nom de la base de dades
-    'template_connection_name' => 'mysql', // O 'pgsql'
-],
-
-'migration_parameters' => [
-    // Aquí li diem a la comanda tenants:migrate on són les migracions dels tenants
-    '--path' => [database_path('migrations/tenant')],
-    '--realpath' => true,
-],
-
-'seeder_parameters' => [
-    '--class' => 'DatabaseSeeder', // O el teu seeder de tenants
-    // '--path' => [database_path('seeders/tenant')], // Si tens seeders separats
-],
+> $tenant = \App\Models\Tenant::find('empresa1');
+= App\Models\Tenant {#6611
+    id: "empresa1",
+    created_at: "2026-03-01 11:30:51",
+    updated_at: "2026-03-01 11:30:51",
+    data: null,
+    tenancy_db_name: "tenant_empresa1",
+  }
 
 ```
 
-### Pendent
+2. Crear domini del tenant
 
-1. Acabar de modificar /config/tenancy.php.
+```php
+> $tenant->domains()->create(['domain' => 'empresa1']);
 
-2. Revisar pas 4 -->
+> $tenant->domains()->get();
+= Illuminate\Database\Eloquent\Collection {#6701
+    all: [
+      Stancl\Tenancy\Database\Models\Domain {#6697
+        id: 1,
+        domain: "empresa1",
+        tenant_id: "empresa1",
+        created_at: "2026-03-01 11:35:18",
+        updated_at: "2026-03-01 11:35:18",
+      },
+    ],
+  }
+```
 
-Pas 4: Configurar el Creador de Bases de Dades
-El paquet necessita un usuari de base de dades amb permisos per crear altres bases de dades. Assegura't que l'usuari de la teva connexió principal (central_connection) tingui el privilegi CREATE DATABASE.
 
-Per exemple, a MySQL: GRANT ALL PRIVILEGES ON *.* TO 'el_teu_usuari'@'localhost';
-
-Pas 5: Com Funciona Ara?
-Executar Migracions Centrals: Quan executis php artisan migrate, només s'executaran les migracions de database/migrations a la teva base de dades central.
-
-Crear un Tenant: Quan creïs un tenant nou, el paquet farà el següent automàticament:
-
-$tenant = Tenant::create(['id' => 'client1']);
-$tenant->domains()->create(['domain' => 'client1.localhost']);
-El paquet crearà una nova base de dades anomenada, per exemple, tenant_client1.
-El paquet executarà automàticament les migracions de database/migrations/tenant dins d'aquesta nova base de dades tenant_client1.
-Executar Migracions per a Tenants Existents: Si necessites aplicar noves migracions a tots els tenants que ja existeixen, has d'utilitzar la comanda:
-
-php artisan tenants:migrate
-Aquest enfocament és més net si necessites un aïllament de dades estricte i et permet no haver de pensar a afegir tenant_id a tot arreu.
+---
