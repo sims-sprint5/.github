@@ -78,5 +78,37 @@ environment:
   }
 ```
 
-
 ---
+
+## Adaptació per a sistema de Rols
+
+### He creat el Model SuperAdmin
+
+Per què? El superadmin ha de poder autenticar-se i generar tokens Sanctum, igual que el User. Extenent Authenticatable en lloc de Model bàsic, Laravel sap que és un usuari autenticable.
+
+
+### He creat la migració central
+
+Per què? Aquesta taula viu a l'esquema public (central), no dins cap tenant. Separar-la de la taula users dels tenants garanteix que els superadmins no es barregen mai amb els usuaris finals.
+
+
+### He configurat el provider superadmins a auth.php
+
+Per què? Sanctum necessita saber quin model usar per validar tokens. Sense aquest provider, auth:sanctum sempre buscaria a la taula users dels tenants, mai a superadmins.
+
+### He creat SuperAdminAuthController
+
+Per què? El Superadmin té el seu propi flux d'autenticació separat. Nota user('superadmins') — indica explícitament a Laravel que busqui l'usuari autenticat al provider superadmins, no al de users.
+
+### He creat Tenant Controller
+
+### He creat SuperAdminSeeder
+
+-> Documentar proves...
+
+
+
+
+
+
+
