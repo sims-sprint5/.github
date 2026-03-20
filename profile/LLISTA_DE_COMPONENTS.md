@@ -1,37 +1,68 @@
 # Llistat de components
 
-El projecte està organitzat seguint una arquitectura modular i escalable, diferenciant clarament entre components generals reutilitzables i components específics per mòdul.
-
 ## Components base (globals)
+- **BaseButton** — Botó reutilitzable amb variants — `BaseButton.vue`  
+- **BaseInput** — Camp d’entrada reutilitzable (admet validació/errors) — `BaseInput.vue`  
+- **BaseCard** — Contenidor tipus targeta — `BaseCard.vue`  
+- **BaseToast** — Notificacions tipus toast — `BaseToast.vue`  
+- **BaseModal** — Modal reutilitzable — `BaseModal.vue`  
+- **BaseTable** — Taula genèrica — `BaseTable.vue`  
+- **BasePagination** — Paginació reutilitzable — `BasePagination.vue`  
 
-- `BaseButton` — Botó reutilizable amb diferents estils - src/components/base/BaseButton.vue  
-- `BaseInput` — Camp d'entrada amb validació i format - src/components/base/BaseInput.vue  
-- `BaseCard` — Contenidor per agrupar contingut - src/components/base/BaseCard.vue  
-- `BaseToast` — Notificació temporal en pantalla - src/components/base/BaseToast.vue  
-- `BaseModal` — Finestra modal reutilitzable - src/components/base/BaseModal.vue  
-- `BaseTable` — Taula genèrica amb paginació i ordenació - src/components/base/BaseTable.vue  
+---
 
 ## Layouts
+- **AppLayout** — Estructura principal (Navbar + Sidebar) — `AppLayout.vue`  
+- **Navbar** — Barra superior — `Navbar.vue`  
+- **Sidebar** — Menú lateral — `Sidebar.vue`  
+- **LanguageSelector** — Selector d’idioma — `LanguageSelector.vue`  
 
-- `AppLayout` — Estructura principal de l'aplicació (unio de Navbar i SideBar) - src/layouts/AppLayout.vue  
-- `Navbar` — Barra de navegació superior - src/layouts/components/Navbar.vue  
-- `Sidebar` — Menú lateral de navegació - src/layouts/components/Sidebar.vue  
-- `LanguageSelector` — Selector d'idioma de la UI - src/components/LanguageSelector.vue  
+---
 
 ## Mòdul Auth
+- **AuthLogo** — Logotip per a login/registre — `AuthLogo.vue`  
+- **AuthBackground** — Fons visual d’autenticació — `AuthBackground.vue`  
 
-- `AuthLogo` — Logo per a pantalles d'autenticació (login, register) - src/modules/auth/components/AuthLogo.vue  
-- `AuthBackground` — Fons visual per a pàgines d'autenticació - src/modules/auth/components/AuthBackground.vue  
+---
 
 ## Mòdul Tickets
+- **TicketForm** — Formulari de ticket — `TicketForm.vue`  
+- **TicketTable** — Taula/llistat de tickets — `TicketTable.vue`  
+- **AdminTicketTable** — Taula de tickets (admin) — `AdminTicketTable.vue`  
+- **TicketChat** — Xat associat a ticket — `TicketChat.vue`  
+- **UserTicketChat** — Xat per a usuari final — `UserTicketChat.vue`  
 
-- `TicketForm` — Formulari per crear/editar un ticket - src/modules/tickets/components/TicketForm.vue  
-- `TicketTable` — Llista de tickets per a usuaris - src/modules/tickets/components/TicketTable.vue  
-- `AdminTicketTable` — Taula de tickets amb opcions administratives - src/modules/tickets/components/AdminTicketTable.vue  
-- `TicketChat` — Xat intern associat a un ticket - src/modules/tickets/components/TicketChat.vue  
-- `UserTicketChat` — Interfície de xat per a usuaris finals - src/modules/tickets/components/UserTicketChat.vue  
+---
 
-## Mòdul Users
+## Mòdul Usuaris
+- **UserTable** — Taula d’usuaris — `UserTable.vue`  
+- **UserForm** — Formulari d’usuari — `UserForm.vue`  
 
-- `UserTable` — Taula d'usuaris amb accions - src/modules/users/components/UserTable.vue  
-- `UserForm` — Formulari per crear/editar usuaris - src/modules/users/components/UserForm.vue  
+---
+
+## Mòdul Mapa
+- **MapContainer** — Contenidor del mapa — `MapContainer.vue`  
+- **GeofenceTable** — Taula de geocercas — `GeofenceTable.vue`  
+- **GeofenceFormModal** — Modal d’alta/edició de geocerca — `GeofenceFormModal.vue`  
+- **GeofenceLogsModal** — Modal de logs de geocerca — `GeofenceLogsModal.vue`  
+- **VehicleDetailsModal** — Modal de detalls de vehicle — `VehicleDetailsModal.vue`  
+- **CustomModal** — Modal personalitzat del mòdul — `CustomModal.vue`  
+
+---
+
+## Mòdul Reserves
+- **FilterSidebar** — Panell lateral de filtres — `FilterSidebar.vue`  
+- **VehicleList** — Llistat de vehicles (amb paginació interna) — `VehicleList.vue`  
+- **VehicleCard** — Targeta de vehicle (acció reservar) — `VehicleCard.vue`  
+- **ReservationLogTable** — Taula de logs de reserves — `ReservationLogTable.vue`  
+
+---
+
+## Mòdul Vehicles
+- **VehicleTable** — Taula de vehicles — `VehicleTable.vue`  
+- **VehicleForm** — Formulari de vehicle — `VehicleForm.vue`  
+
+---
+
+## Mòdul Superadmin
+- **TenantForm** — Formulari per crear/editar tenants — `TenantForm.vue`  
