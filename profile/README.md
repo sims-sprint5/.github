@@ -103,20 +103,40 @@ resources/
 
 ## Flux de Treball Git
 
-### Noms de Branques
+---
 
-```
-<type>/<issue>-<description>
-```
+## 📌 Procés per Crear una Branca
 
-Tipus: `feature/`, `bugfix/`, `docs/`, `refactor/`, `perf/`
+En aquest projecte, **cada nova funcionalitat, correcció o millora s’ha de desenvolupar en una branca independent**.  
 
-Exemples:
+No es permet treballar directament sobre `develop`.
+
+Això garanteix:
+
+- Estabilitat de la branca `develop`
+- Treball en paral·lel sense conflictes
+- Traçabilitat de cada canvi
+- Revisió de codi controlada mitjançant Pull Requests
+
+---
+
+### 1️⃣ Abans de Crear la Branca
+
+Abans de crear una branca nova:
+
+- Ha d’existir un **identificador associat** (ex: `BK-12`)
+- S’ha de tenir clara la descripció del canvi
+- La branca ha de correspondre a **una sola funcionalitat o correcció**
+
+---
+
+### 2️⃣ Actualitzar `develop`
+
+Sempre s’ha de partir de l’última versió estable del projecte.
+
 ```bash
-git checkout -b feature/BK-12
-git checkout -b bugfix/456-fix-login
-```
-
+git checkout develop
+git pull origin develop
 ### Missatges de Commit
 
 ```
@@ -156,6 +176,8 @@ El títol de la PR és molt important: ha de ser clar, descriptiu i seguir un fo
 - `<scope>`: àrea o mòdul afectat
 - `<missatge>`: explicació breu del canvi
 
+```
+
 ---
 
 ## Tipus permesos
@@ -185,3 +207,25 @@ docs(readme): update installation instructions
 
 Si realitzem alguna refactorització o canvi documentar-ho i explicar perquè.
 Si ens trobem algun error documentar-lo i documentar com ho hem sol·lucionat.
+
+## 📘 Convenció de Codi per a Classes
+
+Les classes del projecte han de seguir les següents normes per mantenir un codi net, llegible i escalable.
+
+### ✅ Format dels Noms de Classes
+
+- Utilitzar **PascalCase**
+- El nom ha de ser **descriptiu** i representar clarament la responsabilitat de la classe
+- Evitar abreviacions no estàndard
+
+Exemples correctes:
+- UserController
+- VehicleService
+- TicketRepository
+- GeofenceValidator
+
+---
+
+# Quan fer merge amb la branca main
+
+Quan l'Alpha estigui preparada a la branca develop ja podrem fer el merge cap a la branca main.

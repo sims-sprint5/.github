@@ -1,13 +1,114 @@
 ## Documentació tenants
 
-Per al sistema Multi-tenant utilitzarem una base de dades amb un esquema per cada companyia (tenant).
+### Requisits dels tenants
+
+- Base de dades amb esquemes x tenant.
+- Identificació dels Tenants segons el domini.
+
+
+### Procediment
+
+1. /config/tenancy.php
+
+Línia 47 — Canviar tenant_database_manager de MySQLDatabaseManager a PostgreSQLSchemaManager::class. Això indica al paquet que creï esquemes dins la mateixa BD en comptes de bases de dades noves.
+Línia 73 — Al bloc database.managers.pgsql, comentar PostgreSQLDatabaseManager i descomentar PostgreSQLSchemaManager. Aquesta és la línia que realment s'utilitza per gestionar la creació/eliminació d'esquemes.
+Línia 63 — Canviar prefix de 'tenant' a 'tenant_' (amb guió baix) perquè els esquemes es diguin tenant_abc123 en lloc de tenantabc123.
+
+2. Crear el Tenant model.
+
+3. Moure migracions que utilitzen tenants de /migrations a /migrations/tenant
+
+
+4. Moure rutes API de /routes/api.php a /routes/tenant.php
+
+5. A TenancyServiceProvider.php:139-149, el mètode makeTenancyMiddlewareHighestPriority() usa Illuminate\Contracts\Http\Kernel que ja no existeix a Laravel 12 (que usa app.php). Cal:
+
+Eliminar el mètode makeTenancyMiddlewareHighestPriority() del TenancyServiceProvider.
+Afegir la prioritat de middleware directament a app.php dins del callback withMiddleware, usant $middleware->priority([...]) o $middleware->prepend(...).
+
+6. He corretgit les variables d'entorn dels Subdominis
+
+Al fitxer .env he afegit/modificat:
+
+SESSION_DOMAIN=.localhost — Perquè les cookies funcionin entre subdominis.
+SANCTUM_STATEFUL_DOMAINS=localhost,*.localhost — Perquè Sanctum reconegui peticions des de subdominis com a stateful.
+Verificar que DB_CONNECTION=pgsql, DB_DATABASE=sims, i les credencials de PostgreSQL coincideixen amb el docker-compose.yml.
+
+7. Canvi al document docker-compose.yml
+
+environment:
+  DB_HOST: 127.0.0.1 per postgres.
+
+  Per què postgres? Dins de la xarxa Docker (sims_network), els contenidors es comuniquen pel nom del servei definit al docker-compose.yml, no per IP. El servei de base de dades es diu postgres.
+
+### Proves
+
+1. Crear tenant
+
+```php
+> $tenant = \App\Models\Tenant::create(['id' => 'empresa1']);
+
+> $tenant = \App\Models\Tenant::find('empresa1');
+= App\Models\Tenant {#6611
+    id: "empresa1",
+    created_at: "2026-03-01 11:30:51",
+    updated_at: "2026-03-01 11:30:51",
+    data: null,
+    tenancy_db_name: "tenant_empresa1",
+  }
+
+```
+
+2. Crear domini del tenant
+
+```php
+> $tenant->domains()->create(['domain' => 'empresa1']);
+
+> $tenant->domains()->get();
+= Illuminate\Database\Eloquent\Collection {#6701
+    all: [
+      Stancl\Tenancy\Database\Models\Domain {#6697
+        id: 1,
+        domain: "empresa1",
+        tenant_id: "empresa1",
+        created_at: "2026-03-01 11:35:18",
+        updated_at: "2026-03-01 11:35:18",
+      },
+    ],
+  }
+```
 
 ---
 
-## Com funcionaran els tenanat amb subdominis
+## Adaptació per a sistema de Rols
 
-He vist que podria utilitzar la eina de tunneling 'Expose' per a que em proporcione un Domini, el problema és que per fer wildcard necesito la versió de pagament.
+### He creat el Model SuperAdmin
 
-SOLUCIÓ:
+Per què? El superadmin ha de poder autenticar-se i generar tokens Sanctum, igual que el User. Extenent Authenticatable en lloc de Model bàsic, Laravel sap que és un usuari autenticable.
+
+
+### He creat la migració central
+
+Per què? Aquesta taula viu a l'esquema public (central), no dins cap tenant. Separar-la de la taula users dels tenants garanteix que els superadmins no es barregen mai amb els usuaris finals.
+
+
+### He configurat el provider superadmins a auth.php
+
+Per què? Sanctum necessita saber quin model usar per validar tokens. Sense aquest provider, auth:sanctum sempre buscaria a la taula users dels tenants, mai a superadmins.
+
+### He creat SuperAdminAuthController
+
+Per què? El Superadmin té el seu propi flux d'autenticació separat. Nota user('superadmins') — indica explícitament a Laravel que busqui l'usuari autenticat al provider superadmins, no al de users.
+
+### He creat Tenant Controller
+
+### He creat SuperAdminSeeder
+
+-> Documentar proves...
+
+
+
+
+
 
 
