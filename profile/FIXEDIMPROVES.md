@@ -34,9 +34,10 @@ ARA:
 
 ## Llista de funcionalitats no implementades
 
-Sistema de reserves (tenen placeholders, falta al backend)
-No hi ha chatbot.
-No hi ha seeders
+Sistema de reserves (tenen placeholders, falta implementar el backend)
+No hi ha chatbot,
+No hi ha seeders.
+
 
 Hem implementat el sistema de reserves, ja que es una funcionalitat bàsica per a l'aplicació. Ara els usuaris poden reservar vehicles i els administradors poden veure les reserves realitzades.
 També hem implementat el chatbot, que permet als usuaris enviar missatges de suport i rebre respostes automàtiques. Això millora l'experiència de l'usuari i facilita la comunicació amb el suport tècnic.
