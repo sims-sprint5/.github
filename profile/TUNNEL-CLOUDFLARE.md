@@ -1,195 +1,195 @@
-# Configurar el túnel Cloudflare del Subsistema IoT
+# Configure the Cloudflare Tunnel for the IoT Subsystem
 
-El backend de producción necesita llegar a la API del IoT (FastAPI) que corre en la máquina local del equipo. El puente entre ambos es un **túnel Cloudflare** que expone el puerto `8088` de la máquina local a internet.
+The production backend needs to reach the IoT API (FastAPI) running on the team's local machine. The bridge between both is a **Cloudflare tunnel** that exposes port `8088` of the local machine to the internet.
 
 ---
 
-## Por qué hay que rehacerlo
+## Why it needs to be redone
 
-El proyecto usa **Quick Tunnels** de Cloudflare (gratuitos, sin cuenta). Cada vez que el contenedor `iot-cloudflared` se reinicia, Cloudflare asigna una URL nueva aleatoria del tipo:
+The project uses Cloudflare **Quick Tunnels** (free, no account required). Every time the `iot-cloudflared` container restarts, Cloudflare assigns a new random URL of the form:
 
 ```
 https://inspection-asking-jets-careers.trycloudflare.com
 ```
 
-Cuando cambia la URL hay que actualizarla en dos sitios:
-1. El `.env` de la Raspberry Pi (`API_WS_URL`)
-2. El secret de GitHub `VEHICLE_SUBSYSTEM_URL` del repo `sims-back`
+When the URL changes it must be updated in two places:
+1. The Raspberry Pi's `.env` file (`API_WS_URL`)
+2. The GitHub secret `VEHICLE_SUBSYSTEM_URL` in the `sims-back` repo
 
 ---
 
-## Paso 1 — Levantar el subsistema IoT
+## Step 1 — Start the IoT subsystem
 
-En la máquina del equipo donde está el repo `Subsistema-IoT`:
+On the team's machine where the `Subsistema-IoT` repo is located:
 
 ```bash
 cd ~/Subsistema-IoT
 docker compose up -d
 ```
 
-Esto arranca dos contenedores:
-- `iot-api` — FastAPI en el puerto `8088`
-- `iot-cloudflared` — túnel Cloudflare apuntando a `http://api:8000`
+This starts two containers:
+- `iot-api` — FastAPI on port `8088`
+- `iot-cloudflared` — Cloudflare tunnel pointing to `http://api:8000`
 
 ---
 
-## Paso 2 — Obtener la nueva URL del túnel
+## Step 2 — Get the new tunnel URL
 
 ```bash
 cd ~/Subsistema-IoT
 docker compose logs cloudflared | grep trycloudflare
 ```
 
-La salida tendrá una línea parecida a:
+The output will have a line similar to:
 
 ```
 |  https://inspection-asking-jets-careers.trycloudflare.com  |
 ```
 
-Copia esa URL completa (con `https://`).
+Copy that full URL (including `https://`).
 
 ---
 
-## Paso 3 — Actualizar la Raspberry Pi
+## Step 3 — Update the Raspberry Pi
 
-La Raspberry Pi necesita saber la nueva URL para conectarse por WebSocket a la API.
+The Raspberry Pi needs to know the new URL to connect via WebSocket to the API.
 
-### 3a. Conectarse por SSH
+### 3a. Connect via SSH
 
 ```bash
 ssh admin@192.168.0.112
-# contraseña: admin
+# password: admin
 ```
 
-> Si no tienes `sshpass`, prueba primero con el comando directo; si pide contraseña escríbela manualmente.
+> If you don't have `sshpass`, try the direct command first; if it asks for a password, type it manually.
 
-### 3b. Editar el `.env` del cliente WebSocket
+### 3b. Edit the WebSocket client `.env` file
 
 ```bash
-cd ~/raspberry          # o la ruta donde esté client_ws.py
+cd ~/raspberry          # or the path where client_ws.py is located
 nano .env
 ```
 
-Cambia la línea `API_WS_URL` con la nueva URL (formato WebSocket, no HTTP):
+Change the `API_WS_URL` line with the new URL (WebSocket format, not HTTP):
 
 ```
-API_WS_URL=wss://NUEVA-URL.trycloudflare.com/ws/vehicle/001
+API_WS_URL=wss://NEW-URL.trycloudflare.com/ws/vehicle/001
 ```
 
-> Sustituye `https://` por `wss://` y añade `/ws/vehicle/001` al final.
+> Replace `https://` with `wss://` and add `/ws/vehicle/001` at the end.
 
-Guarda el archivo (`Ctrl+O`, `Ctrl+X`).
+Save the file (`Ctrl+O`, `Ctrl+X`).
 
-### 3c. Reiniciar el cliente
+### 3c. Restart the client
 
 ```bash
-# Matar el proceso anterior si está corriendo
+# Kill the previous process if it is running
 pkill -f client_ws.py || true
 
-# Iniciar de nuevo con el .env actualizado
+# Start again with the updated .env
 cd ~/raspberry
 nohup ./venv/bin/python3 -u client_ws.py >> client_ws.log 2>&1 &
 disown $!
 ```
 
-Verifica que conecta correctamente:
+Verify it connects correctly:
 
 ```bash
 tail -20 ~/raspberry/client_ws.log
 ```
 
-Deberías ver mensajes de conexión WebSocket y envío de temperatura.
+You should see WebSocket connection messages and temperature readings being sent.
 
 ---
 
-## Paso 4 — Actualizar el secret de GitHub
+## Step 4 — Update the GitHub secret
 
-El backend de producción recibe la URL del túnel a través de un secret de GitHub que se inyecta al `.env` del servidor en cada deploy.
+The production backend receives the tunnel URL through a GitHub secret that is injected into the server's `.env` on every deploy.
 
-1. Ve a **GitHub → repo `sims-back` → Settings → Secrets and variables → Actions**
-2. Edita el secret `VEHICLE_SUBSYSTEM_URL`
-3. Pega la nueva URL con `https://` (sin `/ws/...` — esa parte la añade el backend)
+1. Go to **GitHub → `sims-back` repo → Settings → Secrets and variables → Actions**
+2. Edit the secret `VEHICLE_SUBSYSTEM_URL`
+3. Paste the new URL with `https://` (without `/ws/...` — that part is added by the backend)
 
 ```
-https://NUEVA-URL.trycloudflare.com
+https://NEW-URL.trycloudflare.com
 ```
 
-4. Guarda.
+4. Save.
 
 ---
 
-## Paso 5 — Forzar un redeploy del backend
+## Step 5 — Force a backend redeploy
 
-Para que el servidor recoja el nuevo valor del secret, haz un push vacío o redispara el workflow manualmente:
+For the server to pick up the new secret value, make an empty push or manually re-trigger the workflow:
 
 ```bash
-# Opción A — push vacío
-git commit --allow-empty -m "ci: actualizar URL del túnel IoT"
+# Option A — empty push
+git commit --allow-empty -m "ci: update IoT tunnel URL"
 git push origin main
 
-# Opción B — desde la web de GitHub
+# Option B — from the GitHub web interface
 # Actions → Deploy Main to Production → Re-run all jobs
 ```
 
 ---
 
-## Paso 6 — Verificar el pipeline completo
+## Step 6 — Verify the complete pipeline
 
-### Desde la máquina local (directo al IoT):
+### From the local machine (direct to IoT):
 
 ```bash
-# Encender LED
+# Turn LED on
 curl -X POST http://localhost:8088/api/actuator/001/on \
      -H "X-API-Key: subsistemaequip2"
 
-# Apagar LED
+# Turn LED off
 curl -X POST http://localhost:8088/api/actuator/001/off \
      -H "X-API-Key: subsistemaequip2"
 
-# Última temperatura
+# Latest temperature
 curl http://localhost:8088/api/laravel/temperatures/latest \
      -H "X-API-Key: subsistemaequip2"
 ```
 
-### Desde internet (a través del túnel):
+### From the internet (through the tunnel):
 
 ```bash
-curl -X POST https://NUEVA-URL.trycloudflare.com/api/actuator/001/on \
+curl -X POST https://NEW-URL.trycloudflare.com/api/actuator/001/on \
      -H "X-API-Key: subsistemaequip2"
 ```
 
-Si responde `{"message":"Actuator ON sent to vehicle 001","status":"ok","state":"on"}` el túnel funciona.
+If it responds with `{"message":"Actuator ON sent to vehicle 001","status":"ok","state":"on"}` the tunnel is working.
 
-### Desde el frontend:
+### From the frontend:
 
-En **Mis Reservas**, pulsa el botón morado de control en cualquier reserva activa. Si aparece la temperatura y los botones encender/apagar responden, el pipeline completo está operativo.
+In **My Reservations**, click the purple control button on any active reservation. If the temperature appears and the on/off buttons respond, the complete pipeline is operational.
 
 ---
 
-## Esquema del flujo
+## Flow diagram
 
 ```
-Frontend (navegador)
+Frontend (browser)
     │  POST /api/v1/reservations/{id}/vehicle/on
     ▼
-Backend Laravel (producción)
-    │  POST https://NUEVA-URL.trycloudflare.com/api/actuator/001/on
+Laravel Backend (production)
+    │  POST https://NEW-URL.trycloudflare.com/api/actuator/001/on
     │  Header: X-API-Key: subsistemaequip2
     ▼
 Cloudflare Quick Tunnel
-    │  (reenvía a localhost:8088 en la máquina local)
+    │  (forwards to localhost:8088 on the local machine)
     ▼
-FastAPI IoT API (localhost:8088 / puerto 8000 en Docker)
+FastAPI IoT API (localhost:8088 / port 8000 in Docker)
     │  WebSocket → Raspberry Pi
     ▼
-Raspberry Pi (GPIO pin 24 → LED/actuador)
+Raspberry Pi (GPIO pin 24 → LED/actuator)
 ```
 
 ---
 
-## Variables de entorno relevantes
+## Relevant environment variables
 
-| Dónde | Variable | Valor ejemplo |
+| Where | Variable | Example value |
 |-------|----------|---------------|
 | Backend `.env` (prod) | `VEHICLE_SUBSYSTEM_URL` | `https://xxx.trycloudflare.com` |
 | Backend `.env` (prod) | `VEHICLE_SUBSYSTEM_KEY` | `subsistemaequip2` |
@@ -199,6 +199,6 @@ Raspberry Pi (GPIO pin 24 → LED/actuador)
 
 ---
 
-## Alternativa permanente (opcional)
+## Permanent alternative (optional)
 
-Si el equipo tiene una cuenta de Cloudflare con un dominio propio, se puede crear un **Named Tunnel** con URL fija. Esto elimina la necesidad de actualizar la URL manualmente cada vez. Consultar la [documentación oficial de Cloudflare Tunnels](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/).
+If the team has a Cloudflare account with their own domain, a **Named Tunnel** with a fixed URL can be created. This eliminates the need to manually update the URL every time. See the [official Cloudflare Tunnels documentation](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/).
