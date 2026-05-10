@@ -1,151 +1,157 @@
-# Contribuint a Blink
+# Contributing to Blink
 
-Directrius per a col·laboradors del projecte Blink (Frontend & Backend).
+Guidelines for contributors to the Blink project (Frontend & Backend).
 
 ---
 
 ## Frontend
 
-Projecte frontend amb Vue 3 + Vite.
+Frontend project with Vue 3 + Vite.
 
-Aplicació disponible a `http://localhost:5173`
+Application available at `http://localhost:5173`
 
-### Estructura del Projecte
+### Project Structure
 
 ```
 src/
-├── modules/          # Mòduls de funcionalitat (auth, tickets, users, etc.)
-├── components/base/  # Components base reutilitzables
-├── layouts/          # Components de maquetació
+├── modules/          # Functionality modules (auth, tickets, users, etc.)
+├── components/base/  # Reusable base components
+├── layouts/          # Layout components
 ├── shared/           # Composables, services, types, utils
-├── router/           # Definicions de rutes
-└── locales/          # Traduccions i18n (en.json, es.json, ca.json)
+├── router/           # Route definitions
+└── locales/          # i18n translations (en.json, es.json, ca.json)
 ```
 
-Cada mòdul: `routes.ts`, `types/`, `services/`, `components/`, `views/`, `utils/`
+Each module: `routes.ts`, `types/`, `services/`, `components/`, `views/`, `utils/`
 
-### Convencions de Noms
+### Naming Conventions
 
 - **Components**: PascalCase (`UserForm.vue`, `TicketTable.vue`)
 - **Types**: PascalCase (`User`, `TicketFormData`)
-- **Funcions/Variables**: camelCase (`validateEmail`, `fetchTickets`)
+- **Functions/Variables**: camelCase (`validateEmail`, `fetchTickets`)
 - **Constants**: UPPER_SNAKE_CASE (`API_TIMEOUT`, `MAX_RETRIES`)
-- **Composables**: prefix `use` (`useToast`, `useSettings`)
+- **Composables**: `use` prefix (`useToast`, `useSettings`)
 
-### Estàndards de Codi
+### Code Standards
 
 #### TypeScript & Vue
 
-- Utilitzar TypeScript estricte (enforced a `tsconfig.json`)
-- Definir tipus per a totes estructures de dades
-- Evitar `any`; utilitzar `unknown` si és necessari
-- Usar Composition API amb `<script setup>`
+- Use strict TypeScript (enforced in `tsconfig.json`)
+- Define types for all data structures
+- Avoid `any`; use `unknown` if necessary
+- Use Composition API with `<script setup>`
 
-#### Estilitzat
+#### Styling
 
-- Usar Tailwind CSS (clases d'utilitat als templates)
-- Sense estils inline
-- Usar `<style scoped>`
+- Use Tailwind CSS (utility classes in templates)
+- No inline styles
+- Use `<style scoped>`
+
+---
 
 ## Backend
 
-Projecte backend API Laravel.
+Laravel API backend project.
 
-API disponible a `http://localhost:8001`
+API available at `http://localhost:8001`
 
-### Estructura del Projecte
+### Project Structure
 
 ```
 app/
 ├── Http/              # Controllers & Requests
 ├── Models/            # Eloquent Models
 └── Providers/         # Service Providers
-config/                # Fitxers de configuració
+config/                # Configuration files
 database/
-├── migrations/        # Migracions de base de dades
+├── migrations/        # Database migrations
 ├── factories/         # Model factories
-└── seeders/          # Database seeders
+└── seeders/           # Database seeders
 routes/
-├── api.php           # Rutes API
-├── web.php           # Rutes web
-└── console.php       # Comandes de consola
+├── api.php            # API routes
+├── web.php            # Web routes
+└── console.php        # Console commands
 resources/
-├── views/            # Plantilles Blade
-├── css/              # Estils
-└── js/               # JavaScript
+├── views/             # Blade templates
+├── css/               # Styles
+└── js/                # JavaScript
 ```
 
-### Convencions de Noms
+### Naming Conventions
 
-- **Models**: PascalCase singular (`User`, `Vehicle`, `Geofence`)
-- **Controllers**: PascalCase amb suffix `Controller` (`UserController`, `TicketController`)
+- **Models**: Singular PascalCase (`User`, `Vehicle`, `Geofence`)
+- **Controllers**: PascalCase with `Controller` suffix (`UserController`, `TicketController`)
 - **Methods**: camelCase (`storeTicket`, `getUserReservations`)
 - **Variables**: camelCase (`$userId`, `$vehicleData`)
 - **Constants**: UPPER_SNAKE_CASE (`DB_TIMEOUT`, `API_RATE_LIMIT`)
-- **Migrations**: snake_case amb timestamp (`2026_01_21_create_users_table`)
+- **Migrations**: snake_case with timestamp (`2026_01_21_create_users_table`)
 
-### Estàndards de Codi
+### Code Standards
 
 #### PHP & Laravel
 
-- Seguir l'estàndard de codificació PSR-12
-- Definir tipus per a tots els paràmetres i tipus de retorn
-- Usar type hints; evitar barrejar tipus
-- Usar dependency injection als controllers
-- Implementar middleware per a preocupacions transversals
+- Follow the PSR-12 coding standard
+- Define types for all parameters and return types
+- Use type hints; avoid mixing types
+- Use dependency injection in controllers
+- Implement middleware for cross-cutting concerns
 
-#### Base de Dades
+#### Database
 
-- Usar migracions per a canvis d'esquema
-- Definir relacions als Models
-- Usar scope methods per a consultes comunes
-- Afegir índexs adequats a les columnes sovint consultades
-
-## Flux de Treball Git
+- Use migrations for schema changes
+- Define relationships in Models
+- Use scope methods for common queries
+- Add appropriate indexes to frequently queried columns
 
 ---
 
-## 📌 Procés per Crear una Branca
-
-En aquest projecte, **cada nova funcionalitat, correcció o millora s’ha de desenvolupar en una branca independent**.  
-
-No es permet treballar directament sobre `develop`.
-
-Això garanteix:
-
-- Estabilitat de la branca `develop`
-- Treball en paral·lel sense conflictes
-- Traçabilitat de cada canvi
-- Revisió de codi controlada mitjançant Pull Requests
+## Git Workflow
 
 ---
 
-### 1️⃣ Abans de Crear la Branca
+## 📌 Process for Creating a Branch
 
-Abans de crear una branca nova:
+In this project, **every new feature, fix or improvement must be developed on an independent branch**.
 
-- Ha d’existir un **identificador associat** (ex: `BK-12`)
-- S’ha de tenir clara la descripció del canvi
-- La branca ha de correspondre a **una sola funcionalitat o correcció**
+Working directly on `develop` is not allowed.
+
+This ensures:
+
+- Stability of the `develop` branch
+- Parallel work without conflicts
+- Traceability of every change
+- Controlled code review through Pull Requests
 
 ---
 
-### 2️⃣ Actualitzar `develop`
+### 1️⃣ Before Creating the Branch
 
-Sempre s’ha de partir de l’última versió estable del projecte.
+Before creating a new branch:
+
+- An **associated identifier must exist** (e.g. `BK-12`)
+- The description of the change must be clear
+- The branch must correspond to **a single feature or fix**
+
+---
+
+### 2️⃣ Update `develop`
+
+Always start from the latest stable version of the project.
 
 ```bash
 git checkout develop
 git pull origin develop
-### Missatges de Commit
+```
+
+### Commit Messages
 
 ```
 <type>(<scope>): <message>
 ```
 
-Tipus: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `chore`
+Types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `chore`
 
-Exemples:
+Examples:
 ```bash
 git commit -m "feat(tickets): add filtering by status"
 git commit -m "fix(auth): resolve token expiration"
@@ -153,72 +159,74 @@ git commit -m "fix(auth): resolve token expiration"
 
 ---
 
-# Pull Request Process
-    
+## Pull Request Process
+
 ---
 
-## 1️⃣ Preparació abans de crear la PR
+## 1️⃣ Preparation before creating the PR
 
-Abans de crear una PR, **assegura’t que totes les funcionalitats que afecten els teus canvis funcionen correctament**. Això evita errors en `develop` i facilita la revisió.
+Before creating a PR, **make sure all functionalities affected by your changes work correctly**. This prevents errors in `develop` and makes the review easier.
 
-### 1.1 Sincronitzar amb develop
+### 1.1 Sync with develop
 
-Actualitza la teva branca amb la darrera versió de `develop`:
+Update your branch with the latest version of `develop`:
 
 ```bash
-git pull (dins de la branca develop) o git fetch origin develop (si no troba la branca del git)
-
-### 2.1 Títol de la Pull Request
-
-El títol de la PR és molt important: ha de ser clar, descriptiu i seguir un format uniforme per facilitar la lectura i revisió.
-
-- `<type>`: tipus del canvi
-- `<scope>`: àrea o mòdul afectat
-- `<missatge>`: explicació breu del canvi
-
+git pull (inside the develop branch) or git fetch origin develop (if the branch is not found)
 ```
 
----
+### 2.1 Pull Request Title
 
-## Tipus permesos
+The PR title is very important: it must be clear, descriptive and follow a consistent format to make reading and reviewing easier.
 
-- `feat` → nova funcionalitat
-- `fix` → correcció de bug
-- `refactor` → refactorització de codi
-- `docs` → documentació
-- `style` → canvis d’estil o format (no funcional)
-- `perf` → millores de rendiment
-- `test` → afegir/modificar tests
-- `chore` → tasques generals (configs, scripts, etc.)
+- `<type>`: type of change
+- `<scope>`: affected area or module
+- `<message>`: brief explanation of the change
 
 ---
 
-## Exemples de títols correctes
+## Allowed types
+
+- `feat` → new feature
+- `fix` → bug fix
+- `refactor` → code refactoring
+- `docs` → documentation
+- `style` → style or formatting changes (non-functional)
+- `perf` → performance improvements
+- `test` → adding/modifying tests
+- `chore` → general tasks (configs, scripts, etc.)
+
+---
+
+## Examples of correct titles
+
+```
 feat(tickets): add filtering by status
 fix(auth): resolve token refresh issue
 refactor(users): extract validation logic
 docs(readme): update installation instructions
+```
+
 ---
 
-## Format obligatori
+## Other
 
+If we carry out any refactoring or change, document it and explain why.
+If we encounter any error, document it and document how we solved it.
 
-## Altres
+---
 
-Si realitzem alguna refactorització o canvi documentar-ho i explicar perquè.
-Si ens trobem algun error documentar-lo i documentar com ho hem sol·lucionat.
+## 📘 Code Convention for Classes
 
-## 📘 Convenció de Codi per a Classes
+Project classes must follow these rules to maintain clean, readable and scalable code.
 
-Les classes del projecte han de seguir les següents normes per mantenir un codi net, llegible i escalable.
+### ✅ Class Name Format
 
-### ✅ Format dels Noms de Classes
+- Use **PascalCase**
+- The name must be **descriptive** and clearly represent the responsibility of the class
+- Avoid non-standard abbreviations
 
-- Utilitzar **PascalCase**
-- El nom ha de ser **descriptiu** i representar clarament la responsabilitat de la classe
-- Evitar abreviacions no estàndard
-
-Exemples correctes:
+Correct examples:
 - UserController
 - VehicleService
 - TicketRepository
@@ -226,6 +234,6 @@ Exemples correctes:
 
 ---
 
-# Quan fer merge amb la branca main
+## When to merge into the main branch
 
-Quan l'Alpha estigui preparada a la branca develop ja podrem fer el merge cap a la branca main.
+Once the Alpha is ready on the `develop` branch, we can proceed with the merge into `main`.
