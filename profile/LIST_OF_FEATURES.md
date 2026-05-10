@@ -12,7 +12,7 @@ This document explains **in a very simple way** what each type of user can do wi
 ✔ Can update their profile.
 ✔ Can view available vehicles and their occupancy calendar.
 ✔ Can create reservations and pay via Stripe.
-✔ Can renew their reservations.
+✔ Can renew their reservations via Stripe.
 ✔ Can view, modify or cancel **only their own reservations**.
 ✔ Can view and create their own tickets.
 ✔ Can send and receive messages in their tickets.
@@ -63,6 +63,10 @@ This document explains **in a very simple way** what each type of user can do wi
 
 🤖 CHATBOT
 - `POST /api/v1/chat/ask`
+
+💳 STRIPE PAYMENTS
+- `POST /api/v1/reservations/checkout` *(initiate payment for a new reservation)*
+- `POST /api/v1/reservations/{id}/renewal-intent` *(initiate payment to renew a reservation)*
 
 ---
 
@@ -203,5 +207,5 @@ Handled internally by the system:
 
 ---
 
-**Version:** 2.0
+**Version:** 2.1
 **Last updated:** 08/05/2026
