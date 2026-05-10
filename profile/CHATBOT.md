@@ -2,7 +2,7 @@
 
 ## 1. Overview
 
-A **conversational AI assistant** was implemented for the SIMS vehicle booking platform, using **Groq API** as the language model provider. The chatbot provides user support on how to create, modify, and cancel reservations, with personalized context based on authenticated user data.
+A conversational AI assistant was implemented for the SIMS vehicle booking platform, using Groq API as the language model provider. The chatbot provides user support on how to create, modify, and cancel reservations, with personalized context based on authenticated user data.
 
 ### Technical Decision: Why Groq?
 
