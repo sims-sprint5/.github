@@ -1,54 +1,41 @@
 # PostgreSQL Migration Guide
 
-
-Este documento detalla todos los cambios realizados para migrar el proyecto de **MariaDB/MySQL a PostgreSQL**.
-
+This document details all the changes made to migrate the project from **MariaDB/MySQL to PostgreSQL**.
 
 ---
 
+## 📋 Summary of Changes
 
-## 📋 Resumen de Cambios
-
-
-Se han modificado archivos de configuración, migraciones, Docker, seeders y documentación para implementar PostgreSQL con PostGIS en lugar de MariaDB.
-
+Configuration files, migrations, Docker, seeders and documentation have been modified to implement PostgreSQL with PostGIS instead of MariaDB.
 
 ---
 
+## 🔧 Changes by File
 
-## 🔧 Cambios por Archivo
+### 1. **Dockerfile** (previously: `DockerFile`)
 
+**Changes:**
+- Base image change: `php:8.4-cli` → `php:8.4-fpm`
+- Dependency installation: `mariadb-client` → `libpq-dev`
+- PHP extensions: `pdo_mysql mysqli` → `pdo_pgsql`
+- Added apt cache cleanup: `&& rm -rf /var/lib/apt/lists/*`
+- Permission configuration: `chown -R www-data:www-data storage bootstrap`
+- Use of FPM (FastCGI Process Manager) instead of CLI for better performance
 
-### 1. **Dockerfile** (antes: `DockerFile`)
-
-
-**Cambios:**
-- Cambio de base image: `php:8.4-cli` → `php:8.4-fpm`
-- Instalación de dependencias: `mariadb-client` → `libpq-dev`
-- Extensiones PHP: `pdo_mysql mysqli` → `pdo_pgsql`
-- Adición de limpieza de caché apt: `&& rm -rf /var/lib/apt/lists/*`
-- Configuración de permisos: `chown -R www-data:www-data storage bootstrap`
-- Uso de FPM (FastCGI Process Manager) en lugar de CLI para mejor rendimiento
-
-
-**Por qué:**
-- `php:8.4-fpm` es el estándar para producción y Docker
-- `pdo_pgsql` es el driver para conectar con PostgreSQL
-- Los permisos evitan errores de bootstrap/cache
-
+**Why:**
+- `php:8.4-fpm` is the standard for production and Docker
+- `pdo_pgsql` is the driver to connect with PostgreSQL
+- Permissions prevent bootstrap/cache errors
 
 ---
-
 
 ### 2. **docker-compose.yml**
 
+**Main changes:**
 
-**Cambios principales:**
-
-
-#### Base de datos
+#### Database
 ```yaml
-# ANTES: MariaDB 11.2
+# BEFORE: MariaDB 11.2
 db:
   image: mariadb:11.2
   container_name: mariadb_blink
@@ -60,8 +47,7 @@ db:
     MYSQL_PASSWORD: root
     MYSQL_ROOT_PASSWORD: password
 
-
-# DESPUÉS: PostgreSQL con PostGIS
+# AFTER: PostgreSQL with PostGIS
 postgres:
   image: postgis/postgis:15-3.3
   container_name: sims_postgres
@@ -75,58 +61,47 @@ postgres:
     test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-sims_user}"]
 ```
 
-
-#### Aplicación Laravel
+#### Laravel Application
 ```yaml
-# ANTES
+# BEFORE
 app:
   environment:
     - DB_CONNECTION=mysql
     - DB_PORT=3306
 
-
-# DESPUÉS
+# AFTER
 api:
   environment:
     DB_CONNECTION: pgsql
     DB_PORT: 5432
 ```
 
-
-#### Adiciones nuevas
-- **pgAdmin 4**: Herramienta visual para gestionar PostgreSQL
-- **Healthcheck**: Verifica que PostgreSQL esté listo antes de iniciar la app
-- **Variables de entorno dinámicas**: `${DB_USERNAME:-sims_user}` permite flexibilidad
-- **Red actualizada**: `sims_network` (más descriptivo)
-
+#### New additions
+- **pgAdmin 4**: Visual tool to manage PostgreSQL
+- **Healthcheck**: Verifies PostgreSQL is ready before starting the app
+- **Dynamic environment variables**: `${DB_USERNAME:-sims_user}` allows flexibility
+- **Updated network**: `sims_network` (more descriptive)
 
 ---
-
 
 ### 3. **config/database.php**
 
-
 ```php
-// ANTES
+// BEFORE
 'default' => env('DB_CONNECTION', 'sqlite'),
 
-
-// DESPUÉS
+// AFTER
 'default' => env('DB_CONNECTION', 'pgsql'),
 ```
 
-
-El driver `pgsql` ya estaba definido en el archivo, solo cambió el default.
-
+The `pgsql` driver was already defined in the file, only the default changed.
 
 ---
 
-
 ### 4. **.env.example**
 
-
 ```env
-# ANTES
+# BEFORE
 DB_CONNECTION=sqlite
 # DB_HOST=127.0.0.1
 # DB_PORT=3306
@@ -134,8 +109,7 @@ DB_CONNECTION=sqlite
 # DB_USERNAME=root
 # DB_PASSWORD=
 
-
-# DESPUÉS
+# AFTER
 DB_CONNECTION=pgsql
 DB_HOST=127.0.0.1
 DB_PORT=5432
@@ -144,159 +118,124 @@ DB_USERNAME=sims_user
 DB_PASSWORD=sims_password
 ```
 
-
-**Cambios:** Valores descomentados, específicos para PostgreSQL, nombres descriptivos.
-
+**Changes:** Values uncommented, specific to PostgreSQL, descriptive names.
 
 ---
-
 
 ### 5. **database/migrations/2026_01_21_145551_create_vehiculos_table.php**
 
-
 ```php
-// ANTES (incompatible con PostgreSQL)
+// BEFORE (incompatible with PostgreSQL)
 $table->year('year')->nullable();
 
-
-// DESPUÉS (compatible con ambas BD)
+// AFTER (compatible with both DBs)
 $table->unsignedSmallInteger('year')->nullable();
 ```
 
-
-**Por qué:** `YEAR` es un tipo exclusivo de MySQL/MariaDB. `unsignedSmallInteger` funciona en PostgreSQL y guarda años correctamente (0-65535).
-
+**Why:** `YEAR` is a type exclusive to MySQL/MariaDB. `unsignedSmallInteger` works in PostgreSQL and stores years correctly (0-65535).
 
 ---
-
 
 ### 6. **README.md**
 
+Documentation update:
 
-Actualización de documentación:
-
-
-| Sección | Cambio |
+| Section | Change |
 |---------|--------|
-| Stack Tecnológico | MariaDB 11.2 → PostgreSQL 16 |
-| Variables de Entorno | `DB_PORT=3306` → `DB_PORT=5432` |
-| Puertos | 3306 → 5432 |
+| Tech Stack | MariaDB 11.2 → PostgreSQL 16 |
+| Environment Variables | `DB_PORT=3306` → `DB_PORT=5432` |
+| Ports | 3306 → 5432 |
 | Containers | `mariadb_blink` → `postgres_sims`, `db` → `postgres` |
 
-
 ---
-
 
 ### 7. **.dockerignore**
 
-
-Creado nuevo archivo con exclusiones para Docker builds:
-- Archivos de Git (`.git`, `.gitignore`, `.gitattributes`)
-- Archivos de Docker (`.dockerignore`, `Dockerfile*`, `docker-compose*`)
-- Dependencias Node/PHP (`node_modules`, `vendor`)
+New file created with exclusions for Docker builds:
+- Git files (`.git`, `.gitignore`, `.gitattributes`)
+- Docker files (`.dockerignore`, `Dockerfile*`, `docker-compose*`)
+- Node/PHP dependencies (`node_modules`, `vendor`)
 - Logs, cache, backups
-- Directorios de datos PostgreSQL
-
+- PostgreSQL data directories
 
 ---
-
 
 ### 8. **.gitignore**
 
-
-**Cambios realizados:**
-
+**Changes made:**
 
 ```gitignore
-# ANTES
-.env.*                  # Ignora todos los .env.*
-docker-compose.yml      # Ignorado explícitamente
-DockerFile              # Ignorado
-composer.lock           # Ignorado
+# BEFORE
+.env.*                  # Ignores all .env.*
+docker-compose.yml      # Explicitly ignored
+DockerFile              # Ignored
+composer.lock           # Ignored
 
-
-# DESPUÉS
-.env.*                  # Sigue ignorando .env.backup, .env.production, etc.
-!.env.example           # BUT: permite .env.example
-# docker-compose.yml    # REMOVED: ahora se sube
-# DockerFile            # REMOVED: ahora se sube
-# composer.lock         # REMOVED: ahora se sube (build reproducible)
+# AFTER
+.env.*                  # Still ignores .env.backup, .env.production, etc.
+!.env.example           # BUT: allows .env.example
+# docker-compose.yml    # REMOVED: now committed
+# DockerFile            # REMOVED: now committed
+# composer.lock         # REMOVED: now committed (reproducible build)
 ```
 
-
-**Razón:** Estos archivos son esenciales para que otros desarrolladores puedan hacer pull y ejecutar `docker compose up` sin configuración adicional.
-
+**Reason:** These files are essential for other developers to pull and run `docker compose up` without additional configuration.
 
 ---
 
+## 📊 Models & Seeders
 
-## 📊 Modelos & Seeders
+**No changes needed.** The models already had:
+- `protected $primaryKey = 'user_id'` (compatible with PostgreSQL)
+- `protected $fillable = [...]` (works the same)
+- Relationships with `foreignId` (DB-agnostic)
 
-
-**Sin cambios necesarios.** Los modelos ya tenían:
-- `protected $primaryKey = 'user_id'` (compatible con PostgreSQL)
-- `protected $fillable = [...]` (funciona igual)
-- Relaciones con `foreignId` (agnóstico de BD)
-
-
-**DatabaseSeeder.php:** Funciona tal cual. Laravel/Eloquent maneja las diferencias de BD automáticamente.
-
+**DatabaseSeeder.php:** Works as-is. Laravel/Eloquent handles DB differences automatically.
 
 ---
 
+## 🚀 Implementation Steps
 
-## 🚀 Pasos de Implementación
-
-
-### 1. Configuración inicial
+### 1. Initial setup
 ```bash
-# Clonar repo
+# Clone repo
 git clone <url> && cd sims-back-3
 
-
-# Copiar .env
+# Copy .env
 cp .env.example .env
 
-
-# Generar APP_KEY
+# Generate APP_KEY
 php artisan key:generate
 
-
-# Instalar dependencias
+# Install dependencies
 composer install
 ```
 
-
 ### 2. Docker
 ```bash
-# Build y start
+# Build and start
 docker compose up -d --build
 
-
-# Verificar que PostgreSQL está listo
+# Verify PostgreSQL is ready
 docker compose exec postgres pg_isready -U sims_user
 ```
 
-
-### 3. Base de datos
+### 3. Database
 ```bash
-# Migraciones y seeders
+# Migrations and seeders
 php artisan migrate:fresh --seed
 
-
-# O con verbose para ver detalles
+# Or with verbose to see details
 php artisan migrate:fresh --seed -v
 ```
 
-
-### 4. pgAdmin (opcional)
+### 4. pgAdmin (optional)
 ```
 URL: http://localhost:5050
 Email: admin@example.com
 Password: admin
 
-
-Registrar servidor:
+Register server:
 - Host: postgres
 - Port: 5432
 - Database: sims
@@ -304,31 +243,24 @@ Registrar servidor:
 - Password: sims_password
 ```
 
-
 ---
 
-
-## 🔍 Ventajas de PostgreSQL vs MariaDB
-
+## 🔍 PostgreSQL vs MariaDB Advantages
 
 | Feature | PostgreSQL | MariaDB |
 |---------|-----------|---------|
-| **PostGIS** | ✅ Nativo | ❌ Extensión limitada |
-| **JSON** | ✅ Tipo nativo + índices | ⚠️ Limitado |
-| **Escalabilidad** | ✅ Excelente | ⚠️ Buena |
-| **Transactions** | ✅ MVCC (mejor concurrencia) | ⚠️ Locks tradicionales |
-| **Replicación** | ✅ Built-in | ⚠️ Requiere setup |
-| **Tipos complejos** | ✅ Arrays, Ranges, Domains | ❌ No soporta |
+| **PostGIS** | ✅ Native | ❌ Limited extension |
+| **JSON** | ✅ Native type + indexes | ⚠️ Limited |
+| **Scalability** | ✅ Excellent | ⚠️ Good |
+| **Transactions** | ✅ MVCC (better concurrency) | ⚠️ Traditional locks |
+| **Replication** | ✅ Built-in | ⚠️ Requires setup |
+| **Complex types** | ✅ Arrays, Ranges, Domains | ❌ Not supported |
 
-
-**Para este proyecto:** PostGIS es crítico para geofencing. PostgreSQL es la mejor opción.
-
+**For this project:** PostGIS is critical for geofencing. PostgreSQL is the best option.
 
 ---
 
-
-## 📝 Configuración por Entorno
-
+## 📝 Configuration by Environment
 
 ### Development (local)
 ```env
@@ -339,76 +271,55 @@ DB_USERNAME=sims_user
 DB_PASSWORD=sims_password
 ```
 
-
 ### Docker
 ```env
-DB_HOST=postgres          # Nombre del servicio en docker-compose
+DB_HOST=postgres          # Service name in docker-compose
 DB_PORT=5432
 DB_DATABASE=sims
 DB_USERNAME=sims_user
 DB_PASSWORD=sims_password
 ```
 
-
 ### Production
 ```env
-DB_HOST=<RDS/IP externa>
+DB_HOST=<RDS/external IP>
 DB_PORT=5432
 DB_DATABASE=sims_prod
-DB_USERNAME=<usuario seguro>
-DB_PASSWORD=<contraseña segura>
+DB_USERNAME=<secure user>
+DB_PASSWORD=<secure password>
 ```
 
-
 ---
-
 
 ## 🐛 Troubleshooting
 
-
 ### "relation does not exist"
-- Asegúrate de apuntar a `sims`, no a `postgres`
-- Schema correcto: `public.users` (no `sims.public.users`)
+- Make sure you are pointing to `sims`, not `postgres`
+- Correct schema: `public.users` (not `sims.public.users`)
 
+### pgAdmin does not show tables
+- **Maintenance database** must be `sims` (not `postgres`)
+- Refresh the tree: right-click on **Tables** → **Refresh**
 
-### pgAdmin no muestra tablas
-- **Maintenance database** debe ser `sims` (no `postgres`)
-- Refresh el árbol: click derecho en **Tables** → **Refresh**
+### Migrations do not run
+- Verify: `docker compose exec postgres psql -U sims_user -d sims -c "\dt"`
+- If empty: `php artisan migrate:fresh`
 
-
-### Migraciones no corren
-- Verifica: `docker compose exec postgres psql -U sims_user -d sims -c "\dt"`
-- Si vacío: `php artisan migrate:fresh`
-
-
-### Laravel no se conecta
-- Verifica healthcheck: `docker compose exec postgres pg_isready -U sims_user`
+### Laravel cannot connect
+- Check healthcheck: `docker compose exec postgres pg_isready -U sims_user`
 - Logs: `docker compose logs api`
-
 
 ---
 
-
-## 📚 Referencias
-
+## 📚 References
 
 - [PostgreSQL Official](https://www.postgresql.org/docs/)
 - [PostGIS Manual](https://postgis.net/docs/)
 - [Laravel Database Configuration](https://laravel.com/docs/12.x/database)
 - [Docker Compose](https://docs.docker.com/compose/)
 
-
 ---
 
+**Last updated:** February 24, 2026
 
-**Última actualización:** 24 de febrero de 2026
-
-
-**Estado:** ✅ Completado y probado
-
-
-
-
-
-
-
+**Status:** ✅ Completed and tested
