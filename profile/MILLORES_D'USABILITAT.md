@@ -24,7 +24,7 @@ Hem canviat els colors globals, secundaris i els colors d'estat, entre altres. H
 
 Hem fet ús de components, que dona consistència visual dels dels components, fent més previsible la navegació.
 
-Hem integrat Sienna Accessibility, és un plugin que permet als usuaris modificar aspectes visuals de la web de manera senzilla, qual cosa millora considerablement l'us dels usuaris.
+Hem integrat Sienna Accessibility, és un widget d'accessibilitat que permet als usuaris modificar aspectes visuals de la web de manera senzilla, qual cosa millora considerablement l'us dels usuaris.
 
 També hem afegit un Switch per canviar entre Tema Clar i Tema Fosc.
 Per últim hem afegit Tooltips, per a que els usuaris sàpiguen que fan els botons.
