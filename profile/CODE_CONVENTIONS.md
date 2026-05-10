@@ -49,6 +49,7 @@ app/
 ├── Models/
 ├── Http/Controllers/
 ├── Http/Requests/
+├── Services/
 routes/api.php
 database/migrations/
 ```
@@ -75,3 +76,17 @@ database/migrations/
 - Use dependency injection in constructors
 - Return proper HTTP status codes (201 create, 204 delete)
 - Use null-safe operator `?->` for null handling
+
+### API Response Format
+
+**Success (200/201)**:
+```json
+{ "data": { ... }, "message": "optional" }
+```
+
+**Error (4xx/5xx)**:
+```json
+{ "error": "description", "status": 500 }
+```
+
+**Delete (204)**: empty body.

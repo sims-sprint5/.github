@@ -142,7 +142,7 @@ Documentation update:
 
 | Section | Change |
 |---------|--------|
-| Tech Stack | MariaDB 11.2 → PostgreSQL 16 |
+| Tech Stack | MariaDB 11.2 → PostgreSQL 15 |
 | Environment Variables | `DB_PORT=3306` → `DB_PORT=5432` |
 | Ports | 3306 → 5432 |
 | Containers | `mariadb_blink` → `postgres_sims`, `db` → `postgres` |

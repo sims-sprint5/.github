@@ -33,7 +33,7 @@ A conversational AI assistant was implemented for the SIMS vehicle booking platf
                      │ POST /api/v1/chat/ask
                      │ (Authenticated)
 ┌────────────────────▼──────────────────────────────────────┐
-│               Backend (Laravel 11)                        │
+│               Backend (Laravel 12)                        │
 │  ┌──────────────────────────────────────────────────┐   │
 │  │ ChatController@ask                               │   │
 │  │ ✓ Validates message (required, string, max:5000)│   │
@@ -158,14 +158,14 @@ Route::prefix('api/v1')->middleware('auth:sanctum')->group(function () {
 <template>
   <div class="chat-widget">
     <!-- Header -->
-    <div class="chat-header">
+    <div class="chat-header" @click="toggle">
       <h3>SIMS Assistant</h3>
-      <button @click="toggle">✕</button>
+      <button>✕</button>
     </div>
 
     <!-- Messages -->
     <div class="messages" v-if="open">
-      <div v-for="msg in messages" :key="msg.id" 
+      <div v-for="msg in messages" :key="msg.id"
            :class="['msg', msg.role]">
         <p>{{ msg.content }}</p>
       </div>
@@ -173,10 +173,10 @@ Route::prefix('api/v1')->middleware('auth:sanctum')->group(function () {
 
     <!-- Input -->
     <div class="input-area" v-if="open">
-      <input v-model="userInput" 
+      <input v-model="userInput"
              @keyup.enter="sendMessage"
              placeholder="Type your question..."
-             :disabled="loading">
+             :disabled="loading" />
       <button @click="sendMessage" :disabled="loading">
         {{ loading ? '...' : 'Send' }}
       </button>
@@ -184,74 +184,64 @@ Route::prefix('api/v1')->middleware('auth:sanctum')->group(function () {
   </div>
 </template>
 
-<script>
-export default {
-  data() {
-    return {
-      open: false,
-      messages: [],
-      userInput: '',
-      loading: false,
-    };
-  },
-  methods: {
-    async sendMessage() {
-      if (!this.userInput.trim()) return;
-      this.loading = true;
+<script setup lang="ts">
+import { ref } from 'vue'
 
-      // Add user message
-      this.messages.push({
-        id: Date.now(),
-        role: 'user',
-        content: this.userInput,
-      });
+interface Message {
+  id: number
+  role: 'user' | 'assistant' | 'error'
+  content: string
+}
 
-      try {
-        // API call
-        const response = await fetch('/api/v1/chat/ask', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${this.getToken()}`,
-          },
-          body: JSON.stringify({ message: this.userInput }),
-        });
+const open = ref(false)
+const messages = ref<Message[]>([])
+const userInput = ref('')
+const loading = ref(false)
 
-        if (response.ok) {
-          const data = await response.json();
-          this.messages.push({
-            id: Date.now() + 1,
-            role: 'assistant',
-            content: data.message,
-          });
-        } else {
-          const error = await response.json();
-          this.messages.push({
-            id: Date.now() + 1,
-            role: 'error',
-            content: `Error: ${error.error}`,
-          });
-        }
-      } catch (err) {
-        this.messages.push({
-          id: Date.now() + 1,
-          role: 'error',
-          content: `Connection error: ${err.message}`,
-        });
-      }
+function getToken(): string {
+  return localStorage.getItem('sanctum_token') ?? ''
+}
 
-      this.userInput = '';
-      this.loading = false;
-    },
-    getToken() {
-      return document.querySelector('meta[name="csrf-token"]').content;
-      // Or from localStorage if using Sanctum
-    },
-    toggle() {
-      this.open = !this.open;
-    },
-  },
-};
+function toggle() {
+  open.value = !open.value
+}
+
+async function sendMessage() {
+  if (!userInput.value.trim()) return
+  loading.value = true
+
+  const text = userInput.value
+  messages.value.push({ id: Date.now(), role: 'user', content: text })
+  userInput.value = ''
+
+  // Send full conversation history so the model has context
+  const history = messages.value
+    .filter(m => m.role !== 'error')
+    .map(m => ({ role: m.role, content: m.content }))
+
+  try {
+    const response = await fetch('/api/v1/chat/ask', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${getToken()}`,
+      },
+      body: JSON.stringify({ message: text, history }),
+    })
+
+    if (response.ok) {
+      const data = await response.json()
+      messages.value.push({ id: Date.now() + 1, role: 'assistant', content: data.message })
+    } else {
+      const error = await response.json()
+      messages.value.push({ id: Date.now() + 1, role: 'error', content: `Error: ${error.error}` })
+    }
+  } catch (err: any) {
+    messages.value.push({ id: Date.now() + 1, role: 'error', content: `Connection error: ${err.message}` })
+  }
+
+  loading.value = false
+}
 </script>
 
 <style scoped>
@@ -720,8 +710,8 @@ docker exec sims_api curl -s -X POST https://api.groq.com/openai/v1/chat/complet
 10. **User sees** contextual and actionable help
 
 **Final Stack**:
-- Backend: Laravel 11 + Sanctum + HTTP client
-- Frontend: Vue.js + fetch API
+- Backend: Laravel 12 + Sanctum + HTTP client
+- Frontend: Vue 3 + Composition API (`<script setup>`) + fetch API
 - AI: Groq (openai/gpt-oss-120b)
 - Database: User context info (name, email)
 - Performance: ~100-150ms per request

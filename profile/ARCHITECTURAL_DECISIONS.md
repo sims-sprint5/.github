@@ -22,7 +22,7 @@
 - **Database Migrations** for schema versioning and reproducibility
 - **Models**: User, Vehicle, Reservation, Ticket, Geofence, VehicleGeofenceLog
 - **Docker** for containerized development and deployment
-- **MariaDB** as the relational database
+- **PostgreSQL 15** with **PostGIS** as the relational database
 - **PHPUnit** for automated testing
 - **Token-based authentication** via Sanctum
 
