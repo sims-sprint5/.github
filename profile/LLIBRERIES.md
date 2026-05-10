@@ -1,93 +1,93 @@
-# Llibreries del Backend
+# Backend Libraries
 
-Llistat de totes les llibreries utilitzades en el projecte, la seva versió i propòsit.
+List of all libraries used in the project, their version and purpose.
 
 ---
 
-## 📦 Dependències de Producció (PHP/Composer)
+## 📦 Production Dependencies (PHP/Composer)
 
-| Llibreria | Versió | Descripció |
+| Library | Version | Description |
 |-----------|--------|------------|
-| **PHP** | ^8.2 | Llenguatge de programació base del projecte |
-| **laravel/framework** | ^12.0 | Framework principal. Proporciona routing, ORM (Eloquent), migracions, validació, middleware, cues, esdeveniments i tota l'arquitectura MVC |
-| **laravel/sanctum** | ^4.0 | Autenticació API basada en tokens. Genera i gestiona tokens d'accés personal per protegir els endpoints de l'API REST |
-| **laravel/tinker** | ^2.10.1 | REPL (consola interactiva) per a Laravel. Permet executar codi PHP directament contra l'aplicació per a debugging i proves ràpides |
+| **PHP** | ^8.2 | Base programming language of the project |
+| **laravel/framework** | ^12.0 | Main framework. Provides routing, ORM (Eloquent), migrations, validation, middleware, queues, events and the full MVC architecture |
+| **laravel/sanctum** | ^4.0 | Token-based API authentication. Generates and manages personal access tokens to protect REST API endpoints |
+| **laravel/tinker** | ^2.10.1 | REPL (interactive console) for Laravel. Allows running PHP code directly against the application for debugging and quick testing |
 
 ---
 
 ## 🧩 Spatie (Laravel)
 
-### 🔐 spatie/laravel-permission — Gestió de rols i permisos
-Permet definir rols i permisos de manera flexible i assignar-los als usuaris. Simplifica el control d’accés a rutes i funcionalitats del sistema i s’integra amb els middleware i les polítiques de Laravel.
+### 🔐 spatie/laravel-permission — Role and permission management
+Allows defining roles and permissions flexibly and assigning them to users. Simplifies access control for routes and system functionalities, and integrates with Laravel middleware and policies.
 
-- Assignació de rols i permisos a usuaris.
-- Validació d’accés a rutes i accions del sistema.
-- Integració amb guards i middleware.
-- API clara, robusta i fàcil d’estendre.
+- Role and permission assignment to users.
+- Access validation for routes and system actions.
+- Integration with guards and middleware.
+- Clear, robust and easily extendable API.
 
-S’utilitza per gestionar l’accés segons el tipus d’usuari (Usuari, Admin, Super Admin) i garantir que només puguin executar les accions que els corresponen.
+Used to manage access based on user type (User, Admin, Super Admin) and ensure they can only perform the actions assigned to them.
 
 ---
 
-## 🛠️ Dependències de Desenvolupament (PHP/Composer)
+## 🛠️ Development Dependencies (PHP/Composer)
 
-| Llibreria | Versió | Descripció |
+| Library | Version | Description |
 |-----------|--------|------------|
-| **fakerphp/faker** | ^1.23 | Generador de dades falses (noms, emails, adreces, etc.). S'utilitza en factories i seeders per poblar la base de dades amb dades de prova |
-| **laravel/pail** | ^1.2.2 | Visor de logs en temps real des de la terminal. Mostra els logs de l'aplicació amb colors i filtres |
-| **laravel/pint** | ^1.24 | Formatejador de codi PHP. Aplica les regles d'estil de codi de Laravel automàticament (basat en PHP-CS-Fixer) |
-| **laravel/sail** | ^1.41 | Entorn Docker lleuger per a desenvolupament amb Laravel. Proporciona ordres simplificades per gestionar contenidors |
-| **mockery/mockery** | ^1.6 | Llibreria de mocking per a tests. Permet simular dependències i verificar comportaments en tests unitaris |
-| **nunomaduro/collision** | ^8.6 | Millora la visualització d'errors a la consola. Mostra stack traces llegibles i amb colors quan un test o ordre falla |
-| **phpunit/phpunit** | ^11.5.3 | Framework de testing unitari i d'integració. Executa els tests del projecte amb `php artisan test` |
+| **fakerphp/faker** | ^1.23 | Fake data generator (names, emails, addresses, etc.). Used in factories and seeders to populate the database with test data |
+| **laravel/pail** | ^1.2.2 | Real-time log viewer from the terminal. Displays application logs with colors and filters |
+| **laravel/pint** | ^1.24 | PHP code formatter. Automatically applies Laravel's code style rules (based on PHP-CS-Fixer) |
+| **laravel/sail** | ^1.41 | Lightweight Docker environment for Laravel development. Provides simplified commands to manage containers |
+| **mockery/mockery** | ^1.6 | Mocking library for tests. Allows simulating dependencies and verifying behaviours in unit tests |
+| **nunomaduro/collision** | ^8.6 | Improves error display in the console. Shows readable, coloured stack traces when a test or command fails |
+| **phpunit/phpunit** | ^11.5.3 | Unit and integration testing framework. Runs project tests with `php artisan test` |
 
 ---
 
-## 🌐 Dependències de Frontend (NPM)
+## 🌐 Frontend Dependencies (NPM)
 
-| Llibreria | Versió | Descripció |
+| Library | Version | Description |
 |-----------|--------|------------|
-| **vite** | ^7.0.7 | Bundler i servidor de desenvolupament ultraràpid. Compila i serveix els assets del frontend (CSS, JS) |
-| **laravel-vite-plugin** | ^2.0.0 | Connector (plugin) que integra Vite amb Laravel. Gestiona la càrrega d'assets en les vistes Blade |
-| **tailwindcss** | ^4.0.0 | Framework CSS utility-first. Proporciona classes CSS predefinides per a un disseny ràpid |
-| **@tailwindcss/vite** | ^4.0.0 | Connector de TailwindCSS per a Vite. Processa i optimitza les classes de Tailwind durant el build |
-| **axios** | ^1.11.0 | Client HTTP per a JavaScript. Realitza peticions AJAX des del frontend a l'API |
-| **concurrently** | ^9.0.1 | Executa múltiples ordres en paral·lel. S'utilitza en l'script `dev` per llançar el servidor, cues, logs i Vite simultàniament |
+| **vite** | ^7.0.7 | Ultra-fast bundler and development server. Compiles and serves frontend assets (CSS, JS) |
+| **laravel-vite-plugin** | ^2.0.0 | Plugin that integrates Vite with Laravel. Manages asset loading in Blade views |
+| **tailwindcss** | ^4.0.0 | Utility-first CSS framework. Provides predefined CSS classes for rapid design |
+| **@tailwindcss/vite** | ^4.0.0 | TailwindCSS plugin for Vite. Processes and optimises Tailwind classes during build |
+| **axios** | ^1.11.0 | HTTP client for JavaScript. Makes AJAX requests from the frontend to the API |
+| **concurrently** | ^9.0.1 | Runs multiple commands in parallel. Used in the `dev` script to launch the server, queues, logs and Vite simultaneously |
 
 ---
 
-## 🐳 Serveis Docker
+## 🐳 Docker Services
 
-| Servei | Imatge | Descripció |
+| Service | Image | Description |
 |--------|--------|------------|
-| **PostgreSQL + PostGIS** | `postgis/postgis:15-3.3` | Base de dades relacional amb extensió geoespacial per a geofencing |
-| **pgAdmin 4** | `dpage/pgadmin4` | Interfície web per administrar i visualitzar la base de dades PostgreSQL |
-| **Laravel API** | `php:8.4-fpm` | Contenidor amb PHP-FPM que executa l'aplicació Laravel |
+| **PostgreSQL + PostGIS** | `postgis/postgis:15-3.3` | Relational database with geospatial extension for geofencing |
+| **pgAdmin 4** | `dpage/pgadmin4` | Web interface to administer and visualise the PostgreSQL database |
+| **Laravel API** | `php:8.4-fpm` | Container with PHP-FPM that runs the Laravel application |
 
 ---
 
-## 🔗 Relació entre Llibreries
+## 🔗 Relationship Between Libraries
 
 ```text
 Laravel Framework (core)
-├── Sanctum → Autenticació API (tokens)
-├── Tinker → Debug interactiu
-├── Eloquent ORM → Models i migracions → PostgreSQL
-└── Artisan CLI → Ordres (migrate, seed, test...)
+├── Sanctum → API Authentication (tokens)
+├── Tinker → Interactive debugging
+├── Eloquent ORM → Models and migrations → PostgreSQL
+└── Artisan CLI → Commands (migrate, seed, test...)
 
 Testing
-├── PHPUnit → Tests unitaris/feature
-├── Mockery → Mocking de dependències
-├── Collision → Errors visuals a la consola
-└── Faker → Dades de prova per a seeders/factories
+├── PHPUnit → Unit/feature tests
+├── Mockery → Dependency mocking
+├── Collision → Visual errors in the console
+└── Faker → Test data for seeders/factories
 
-Qualitat de Codi
-└── Pint → Formateig automàtic (CI/CD)
+Code Quality
+└── Pint → Automatic formatting (CI/CD)
 
 Frontend (Assets)
-├── Vite + Laravel Plugin → Compilació
-├── TailwindCSS → Estils
-└── Axios → Peticions HTTP
+├── Vite + Laravel Plugin → Compilation
+├── TailwindCSS → Styles
+└── Axios → HTTP requests
 ```
 
-Última actualització: 26 de febrer de 2026
+Last updated: February 26, 2026
