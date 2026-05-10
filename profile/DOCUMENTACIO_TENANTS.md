@@ -1,53 +1,31 @@
-## Documentació tenants
-
-### Requisits dels tenants
-
-- Base de dades amb esquemes x tenant.
-- Identificació dels Tenants segons el domini.
-
-
-### Procediment
-
+## Tenant Documentation
+### Tenant Requirements
+- Database with schemas per tenant.
+- Tenant identification based on domain.
+### Procedure
 1. /config/tenancy.php
-
-Línia 47 — Canviar tenant_database_manager de MySQLDatabaseManager a PostgreSQLSchemaManager::class. Això indica al paquet que creï esquemes dins la mateixa BD en comptes de bases de dades noves.
-Línia 73 — Al bloc database.managers.pgsql, comentar PostgreSQLDatabaseManager i descomentar PostgreSQLSchemaManager. Aquesta és la línia que realment s'utilitza per gestionar la creació/eliminació d'esquemes.
-Línia 63 — Canviar prefix de 'tenant' a 'tenant_' (amb guió baix) perquè els esquemes es diguin tenant_abc123 en lloc de tenantabc123.
-
-2. Crear el Tenant model.
-
-3. Moure migracions que utilitzen tenants de /migrations a /migrations/tenant
-
-
-4. Moure rutes API de /routes/api.php a /routes/tenant.php
-
-5. A TenancyServiceProvider.php:139-149, el mètode makeTenancyMiddlewareHighestPriority() usa Illuminate\Contracts\Http\Kernel que ja no existeix a Laravel 12 (que usa app.php). Cal:
-
-Eliminar el mètode makeTenancyMiddlewareHighestPriority() del TenancyServiceProvider.
-Afegir la prioritat de middleware directament a app.php dins del callback withMiddleware, usant $middleware->priority([...]) o $middleware->prepend(...).
-
-6. He corretgit les variables d'entorn dels Subdominis
-
-Al fitxer .env he afegit/modificat:
-
-SESSION_DOMAIN=.localhost — Perquè les cookies funcionin entre subdominis.
-SANCTUM_STATEFUL_DOMAINS=localhost,*.localhost — Perquè Sanctum reconegui peticions des de subdominis com a stateful.
-Verificar que DB_CONNECTION=pgsql, DB_DATABASE=sims, i les credencials de PostgreSQL coincideixen amb el docker-compose.yml.
-
-7. Canvi al document docker-compose.yml
-
+Line 47 — Change tenant_database_manager from MySQLDatabaseManager to PostgreSQLSchemaManager::class. This tells the package to create schemas within the same DB instead of new databases.
+Line 73 — In the database.managers.pgsql block, comment out PostgreSQLDatabaseManager and uncomment PostgreSQLSchemaManager. This is the line actually used to manage schema creation/deletion.
+Line 63 — Change prefix from 'tenant' to 'tenant_' (with underscore) so schemas are named tenant_abc123 instead of tenantabc123.
+2. Create the Tenant model.
+3. Move migrations that use tenants from /migrations to /migrations/tenant
+4. Move API routes from /routes/api.php to /routes/tenant.php
+5. In TenancyServiceProvider.php:139-149, the makeTenancyMiddlewareHighestPriority() method uses Illuminate\Contracts\Http\Kernel which no longer exists in Laravel 12 (which uses app.php). You need to:
+Remove the makeTenancyMiddlewareHighestPriority() method from TenancyServiceProvider.
+Add middleware priority directly in app.php inside the withMiddleware callback, using $middleware->priority([...]) or $middleware->prepend(...).
+6. Fixed Subdomain environment variables
+In the .env file I added/modified:
+SESSION_DOMAIN=.localhost — So cookies work across subdomains.
+SANCTUM_STATEFUL_DOMAINS=localhost,*.localhost — So Sanctum recognizes requests from subdomains as stateful.
+Verify that DB_CONNECTION=pgsql, DB_DATABASE=sims, and the PostgreSQL credentials match the docker-compose.yml.
+7. Change in docker-compose.yml
 environment:
-  DB_HOST: 127.0.0.1 per postgres.
-
-  Per què postgres? Dins de la xarxa Docker (sims_network), els contenidors es comuniquen pel nom del servei definit al docker-compose.yml, no per IP. El servei de base de dades es diu postgres.
-
-### Proves
-
-1. Crear tenant
-
+  DB_HOST: 127.0.0.1 to postgres.
+  Why postgres? Inside the Docker network (sims_network), containers communicate using the service name defined in docker-compose.yml, not by IP. The database service is called postgres.
+### Tests
+1. Create tenant
 ```php
 > $tenant = \App\Models\Tenant::create(['id' => 'empresa1']);
-
 > $tenant = \App\Models\Tenant::find('empresa1');
 = App\Models\Tenant {#6611
     id: "empresa1",
@@ -56,14 +34,10 @@ environment:
     data: null,
     tenancy_db_name: "tenant_empresa1",
   }
-
 ```
-
-2. Crear domini del tenant
-
+2. Create tenant domain
 ```php
 > $tenant->domains()->create(['domain' => 'empresa1']);
-
 > $tenant->domains()->get();
 = Illuminate\Database\Eloquent\Collection {#6701
     all: [
@@ -77,38 +51,16 @@ environment:
     ],
   }
 ```
-
 ---
-
-## Adaptació per a sistema de Rols
-
-### He creat el Model SuperAdmin
-
-Per què? El superadmin ha de poder autenticar-se i generar tokens Sanctum, igual que el User. Extenent Authenticatable en lloc de Model bàsic, Laravel sap que és un usuari autenticable.
-
-
-### He creat la migració central
-
-Per què? Aquesta taula viu a l'esquema public (central), no dins cap tenant. Separar-la de la taula users dels tenants garanteix que els superadmins no es barregen mai amb els usuaris finals.
-
-
-### He configurat el provider superadmins a auth.php
-
-Per què? Sanctum necessita saber quin model usar per validar tokens. Sense aquest provider, auth:sanctum sempre buscaria a la taula users dels tenants, mai a superadmins.
-
-### He creat SuperAdminAuthController
-
-Per què? El Superadmin té el seu propi flux d'autenticació separat. Nota user('superadmins') — indica explícitament a Laravel que busqui l'usuari autenticat al provider superadmins, no al de users.
-
-### He creat Tenant Controller
-
-### He creat SuperAdminSeeder
-
--> Documentar proves...
-
-
-
-
-
-
-
+## Adaptation for Roles System
+### Created the SuperAdmin Model
+Why? The superadmin must be able to authenticate and generate Sanctum tokens, just like the User. By extending Authenticatable instead of the basic Model, Laravel knows it is an authenticatable user.
+### Created the central migration
+Why? This table lives in the public (central) schema, not inside any tenant. Separating it from the tenants' users table ensures superadmins never get mixed with end users.
+### Configured the superadmins provider in auth.php
+Why? Sanctum needs to know which model to use to validate tokens. Without this provider, auth:sanctum would always look in the tenants' users table, never in superadmins.
+### Created SuperAdminAuthController
+Why? The Superadmin has its own separate authentication flow. Note user('superadmins') — it explicitly tells Laravel to look for the authenticated user in the superadmins provider, not in the users one.
+### Created Tenant Controller
+### Created SuperAdminSeeder
+-> Document tests...
