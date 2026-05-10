@@ -1,24 +1,24 @@
-# Implementación del Chatbot SIMS - Documentación Completa
+# SIMS Chatbot Implementation - Complete Documentation
 
-## 1. Visión General
+## 1. Overview
 
-Se implementó un **asistente de IA conversacional** para la plataforma SIMS de reserva de vehículos, utilizando **Groq API** como proveedor de modelos de lenguaje. El chatbot proporciona soporte al usuario sobre cómo crear, modificar y cancelar reservas, con contexto personalizado basado en datos del usuario autenticado.
+A **conversational AI assistant** was implemented for the SIMS vehicle booking platform, using **Groq API** as the language model provider. The chatbot provides user support on how to create, modify, and cancel reservations, with personalized context based on authenticated user data.
 
-### Decisión Técnica: ¿Por qué Groq?
+### Technical Decision: Why Groq?
 
-| Criterio | ChatGPT API | Groq | Selección |
+| Criterion | ChatGPT API | Groq | Selection |
 |----------|------------|------|-----------|
-| **Costo** | $0.50/M tokens | Gratis |  Groq |
-| **Velocidad** | 40-50ms/token | 5-10ms/token |  Groq |
-| **Tarjetas** | Se requiere | No requiere |  Groq |
-| **Modelos** | Múltiples | Múltiples (OSS) | Empate |
-| **Setup** | Complejo | Simple |  Groq |
+| **Cost** | $0.50/M tokens | Free |  Groq |
+| **Speed** | 40-50ms/token | 5-10ms/token |  Groq |
+| **Card Required** | Yes | No |  Groq |
+| **Models** | Multiple | Multiple (OSS) | Tie |
+| **Setup** | Complex | Simple |  Groq |
 
-**Resultado**: Groq ganó en todos los criterios críticos para un desarrollo rápido sin costos.
+**Result**: Groq won in all critical criteria for fast development with no costs.
 
 ---
 
-## 2. Arquitectura del Sistema
+## 2. System Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────┐
@@ -36,11 +36,11 @@ Se implementó un **asistente de IA conversacional** para la plataforma SIMS de 
 │               Backend (Laravel 11)                        │
 │  ┌──────────────────────────────────────────────────┐   │
 │  │ ChatController@ask                               │   │
-│  │ ✓ Valida mensaje (required, string, max:5000)   │   │
-│  │ ✓ Obtiene usuario autenticado                   │   │
-│  │ ✓ Construye system prompt personalizado         │   │
-│  │ ✓ Llama a Groq API                              │   │
-│  │ ✓ Retorna respuesta o error                     │   │
+│  │ ✓ Validates message (required, string, max:5000)│   │
+│  │ ✓ Gets authenticated user                       │   │
+│  │ ✓ Builds personalized system prompt             │   │
+│  │ ✓ Calls Groq API                                │   │
+│  │ ✓ Returns response or error                     │   │
 │  └──────────────────────────────────────────────────┘   │
 └────────────────────┬──────────────────────────────────────┘
                      │ HTTPS POST
@@ -58,31 +58,31 @@ Se implementó un **asistente de IA conversacional** para la plataforma SIMS de 
 
 ---
 
-## 3. Componentes Implementados
+## 3. Implemented Components
 
 ### 3.1 Backend: ChatController
 
-**Archivo**: `app/Http/Controllers/Api/ChatController.php`
+**File**: `app/Http/Controllers/Api/ChatController.php`
 
-#### Método Principal: `ask(Request $request)`
+#### Main Method: `ask(Request $request)`
 
 ```php
 public function ask(Request $request) {
-    // 1. VALIDACIÓN
+    // 1. VALIDATION
     $request->validate(['message' => 'required|string|max:5000']);
     
-    // 2. CONTEXTO DEL USUARIO
+    // 2. USER CONTEXT
     $user = $request->user();  // Sanctum authenticated user
     $message = $request->string('message');
     
     // 3. SYSTEM PROMPT (Business Logic)
     $systemPrompt = <<<'PROMPT'
-Eres un asistente de soporte para SIMS...
-[Instrucciones sobre funcionalidades]
-[Contexto del usuario inyectado]
+You are a support assistant for SIMS...
+[Instructions about functionalities]
+[Injected user context]
 PROMPT;
     
-    // 4. LLAMADA A GROQ
+    // 4. GROQ API CALL
     $response = Http::withHeaders([
         'Authorization' => 'Bearer ' . env('GROQ_API_KEY'),
     ])->timeout(30)->post('https://api.groq.com/openai/v1/chat/completions', [
@@ -95,7 +95,7 @@ PROMPT;
         'max_tokens' => 1000,
     ]);
     
-    // 5. RETORNA RESPUESTA
+    // 5. RETURN RESPONSE
     if ($response->failed()) {
         return response()->json(['error' => $errorMsg], 500);
     }
@@ -105,28 +105,28 @@ PROMPT;
 }
 ```
 
-#### Características Clave:
+#### Key Features:
 
-| Característica | Valor | Propósito |
+| Feature | Value | Purpose |
 |---|---|---|
-| **Autenticación** | Sanctum | Solo usuarios loggeados |
-| **Validación** | max:5000 chars | Evitar abuso/costos |
-| **Timeout** | 30 segundos | Fallos graceful |
-| **Contexto** | User name + email | Personalisación |
+| **Authentication** | Sanctum | Logged-in users only |
+| **Validation** | max:5000 chars | Prevent abuse/costs |
+| **Timeout** | 30 seconds | Graceful failures |
+| **Context** | User name + email | Personalization |
 | **Temperature** | 0.7 | Balance creativity/consistency |
-| **Max tokens** | 1000 | Respuestas concisas |
+| **Max tokens** | 1000 | Concise responses |
 
-#### System Prompt (Instrucciones al Modelo):
+#### System Prompt (Model Instructions):
 
-El system prompt proporciona:
+The system prompt provides:
 
-1. **Rol**: "Asistente de soporte para SIMS"
-2. **Funcionalidades**: Detalles sobre crear/modificar/cancelar reservas
-3. **Guía de respuestas**: Qué hacer para cada tipo de pregunta
-4. **Restricciones**: "Si no sabes, consulta con soporte"
-5. **Contexto del usuario**: Nombre y email inyectados dinámicamente
+1. **Role**: "Support assistant for SIMS"
+2. **Functionalities**: Details on creating/modifying/canceling reservations
+3. **Response guide**: What to do for each question type
+4. **Restrictions**: "If you don't know, refer to support"
+5. **User context**: Name and email injected dynamically
 
-**Ejemplo de Inyección**:
+**Injection Example**:
 ```php
 $systemPrompt = str_replace(
     ['{user_name}', '{user_email}'],
@@ -135,9 +135,9 @@ $systemPrompt = str_replace(
 );
 ```
 
-### 3.2 Rutas
+### 3.2 Routes
 
-**Archivo**: `routes/tenant.php`
+**File**: `routes/tenant.php`
 
 ```php
 Route::prefix('api/v1')->middleware('auth:sanctum')->group(function () {
@@ -146,20 +146,20 @@ Route::prefix('api/v1')->middleware('auth:sanctum')->group(function () {
 ```
 
 **Endpoint**: `POST /api/v1/chat/ask`
-- **Autenticación**: Token Sanctum requerido
+- **Authentication**: Sanctum token required
 - **Body**: `{"message": "string"}`
 - **Response**: `{"message": "string", "timestamp": "ISO8601"}`
 
 ### 3.3 Frontend: ChatWidget (Vue.js)
 
-**Archivo**: `resources/js/components/ChatWidget.vue`
+**File**: `resources/js/components/ChatWidget.vue`
 
 ```vue
 <template>
   <div class="chat-widget">
     <!-- Header -->
     <div class="chat-header">
-      <h3>Asistente SIMS</h3>
+      <h3>SIMS Assistant</h3>
       <button @click="toggle">✕</button>
     </div>
 
@@ -175,10 +175,10 @@ Route::prefix('api/v1')->middleware('auth:sanctum')->group(function () {
     <div class="input-area" v-if="open">
       <input v-model="userInput" 
              @keyup.enter="sendMessage"
-             placeholder="Escribe tu pregunta..."
+             placeholder="Type your question..."
              :disabled="loading">
       <button @click="sendMessage" :disabled="loading">
-        {{ loading ? '...' : 'Enviar' }}
+        {{ loading ? '...' : 'Send' }}
       </button>
     </div>
   </div>
@@ -199,7 +199,7 @@ export default {
       if (!this.userInput.trim()) return;
       this.loading = true;
 
-      // Agregar mensaje del usuario
+      // Add user message
       this.messages.push({
         id: Date.now(),
         role: 'user',
@@ -207,7 +207,7 @@ export default {
       });
 
       try {
-        // Llamada a API
+        // API call
         const response = await fetch('/api/v1/chat/ask', {
           method: 'POST',
           headers: {
@@ -236,7 +236,7 @@ export default {
         this.messages.push({
           id: Date.now() + 1,
           role: 'error',
-          content: `Error de conexión: ${err.message}`,
+          content: `Connection error: ${err.message}`,
         });
       }
 
@@ -245,7 +245,7 @@ export default {
     },
     getToken() {
       return document.querySelector('meta[name="csrf-token"]').content;
-      // O desde localStorage si usas Sanctum
+      // Or from localStorage if using Sanctum
     },
     toggle() {
       this.open = !this.open;
@@ -340,7 +340,7 @@ button:disabled {
 </style>
 ```
 
-### 3.4 Configuración: .env
+### 3.4 Configuration: .env
 
 ```env
 GROQ_API_KEY=
@@ -349,51 +349,51 @@ GROQ_MODEL=openai/gpt-oss-120b
 
 ---
 
-## 4. Flujo de Funcionamiento End-to-End
+## 4. End-to-End Operation Flow
 
-### Escenario: Usuario hace pregunta sobre crear reserva
+### Scenario: User asks a question about creating a reservation
 
 ```
-1. USUARIO escribe en ChatWidget:
-   "¿Cómo creo una reserva?"
+1. USER types in ChatWidget:
+   "How do I create a reservation?"
 
 2. FRONTEND:
-   - Valida que mensaje no esté vacío
-   - Agrega mensaje del usuario a historial local
-   - Envía POST /api/v1/chat/ask con token Sanctum
-   - Muestra estado "loading..."
+   - Validates message is not empty
+   - Adds user message to local history
+   - Sends POST /api/v1/chat/ask with Sanctum token
+   - Shows "loading..." state
 
 3. BACKEND (ChatController@ask):
-   - Valida que mensaje exista y sea válido
-   - Obtiene usuario autenticado desde token Sanctum
-   - Construye system prompt con instrucciones
-   - Inyecta datos del usuario (nombre, email)
+   - Validates message exists and is valid
+   - Gets authenticated user from Sanctum token
+   - Builds system prompt with instructions
+   - Injects user data (name, email)
 
 4. GROQ API:
-   - Recibe request con modelo openai/gpt-oss-120b
-   - Procesa system prompt + mensaje del usuario
-   - Genera respuesta considerando el contexto SIMS
-   - Retorna JSON con contenido y metadata
+   - Receives request with model openai/gpt-oss-120b
+   - Processes system prompt + user message
+   - Generates response considering SIMS context
+   - Returns JSON with content and metadata
 
-5. BACKEND Retorna:
+5. BACKEND Returns:
    {
-     "message": "Para crear una reserva, ve al Mapa...",
+     "message": "To create a reservation, go to the Map...",
      "timestamp": "2026-04-20T14:00:00Z"
    }
 
 6. FRONTEND:
-   - Recibe respuesta
-   - Agrega mensaje del asistente al historial
-   - Lo muestra en el widget
-   - Usuario puede hacer otra pregunta
+   - Receives response
+   - Adds assistant message to history
+   - Displays it in the widget
+   - User can ask another question
 
-7. CICLO REPITE...
+7. CYCLE REPEATS...
 ```
 
 ### Timing & Performance
 
 ```
-Componente           Tiempo      % Total
+Component            Time        % Total
 ─────────────────────────────────────────
 Frontend POST       ~10ms         10%
 Laravel Router      ~5ms          5%
@@ -405,9 +405,9 @@ TOTAL              ~101ms        100%
 
 ---
 
-## 5. Problemas Encontrados y Soluciones
+## 5. Issues Found and Solutions
 
-### Problema 1: Modelos Deprecados
+### Issue 1: Deprecated Models
 
 **Error**:
 ```json
@@ -419,42 +419,42 @@ TOTAL              ~101ms        100%
 }
 ```
 
-**Modelos testados que fallaron**:
+**Tested models that failed**:
 -  `mixtral-8x7b-32768`
 -  `llama-3.1-70b-versatile`
 -  `llama-3.2-90b-vision-preview`
 -  `gemma-7b-it`
 
-**Causa**: Groq retira modelos antiguos regularmente
+**Cause**: Groq regularly retires old models
 
-**Solución**: Cambiar a `openai/gpt-oss-120b` (modelo OSS mantenido)
+**Solution**: Switch to `openai/gpt-oss-120b` (maintained OSS model)
 
-### Problema 2: API Key Inválida
+### Issue 2: Invalid API Key
 
-**Error**: HTTP 401 Unauthorized en todas las requests
+**Error**: HTTP 401 Unauthorized on all requests
 
-**Causa**: API key expirada/revocada
+**Cause**: Expired/revoked API key
 
-**Solución**: Usar nueva API key válida en .env
+**Solution**: Use a new valid API key in .env
 
-### Problema 3: Frontend 500 Errors
+### Issue 3: Frontend 500 Errors
 
 **Error**: 
 ```
 Failed to load resource: the server responded with a status of 500
 ```
 
-**Causa**: Combinación de modelo deprecado + API key inválida
+**Cause**: Combination of deprecated model + invalid API key
 
-**Solución**: Actualizar ambos en coincidencia
+**Solution**: Update both simultaneously
 
-### Problema 4: CORS en Development
+### Issue 4: CORS in Development
 
-**Error**: `Cross-Origin Request Blocked` en localStorage
+**Error**: `Cross-Origin Request Blocked` on localStorage
 
-**Causa**: Frontend en diferente dominio
+**Cause**: Frontend on a different domain
 
-**Solución**: Configurar vite.config.js proxy:
+**Solution**: Configure vite.config.js proxy:
 ```js
 export default {
   server: {
@@ -470,15 +470,15 @@ export default {
 
 ---
 
-## 6. Configuración de Seguridad
+## 6. Security Configuration
 
-### Autenticación
+### Authentication
 
-- **Middleware**: `auth:sanctum` en rutas de chatbot
-- **Token**: Bearer token en header Authorization
-- **Validez**: Token debe ser válido y no expirado
+- **Middleware**: `auth:sanctum` on chatbot routes
+- **Token**: Bearer token in Authorization header
+- **Validity**: Token must be valid and not expired
 
-### Validación
+### Validation
 
 ```php
 $request->validate([
@@ -486,11 +486,11 @@ $request->validate([
 ]);
 ```
 
-- **Requerido**: No puede siendo vacío
-- **String**: No acepta arrays
-- **Max 5000**: Evita requests enormes
+- **Required**: Cannot be empty
+- **String**: Does not accept arrays
+- **Max 5000**: Prevents oversized requests
 
-### Rate Limiting (Recomendado para Producción)
+### Rate Limiting (Recommended for Production)
 
 ```php
 Route::middleware('throttle:60,1')->group(function () {
@@ -498,7 +498,7 @@ Route::middleware('throttle:60,1')->group(function () {
 });
 ```
 
-Limita a 60 requests por minuto por usuario.
+Limits to 60 requests per minute per user.
 
 ### Logging
 
@@ -506,43 +506,43 @@ Limita a 60 requests por minuto por usuario.
 \Log::error('Groq API failed: ' . $response->status() . ' - ' . $errorMsg);
 ```
 
-Todo error se registra en `storage/logs/laravel.log`
+All errors are logged to `storage/logs/laravel.log`
 
 ---
 
-## 7. Variables de Entorno Requeridas
+## 7. Required Environment Variables
 
 ```env
 # .env
-GROQ_API_KEY=gsk_xxxxx...           # Obligatorio
-GROQ_MODEL=openai/gpt-oss-120b      # Obligatorio
-APP_ENV=local                        # Existente
-APP_KEY=base64:xxxxx...             # Existente
+GROQ_API_KEY=gsk_xxxxx...           # Required
+GROQ_MODEL=openai/gpt-oss-120b      # Required
+APP_ENV=local                        # Existing
+APP_KEY=base64:xxxxx...             # Existing
 ```
 
-**Obtener GROQ_API_KEY**:
-1. Ir a https://console.groq.com
-2. Sign up gratis (sin tarjeta)
+**Getting the GROQ_API_KEY**:
+1. Go to https://console.groq.com
+2. Sign up for free (no card required)
 3. API Keys → Create New Key
-4. Copiar key y pegar en .env
+4. Copy the key and paste it in .env
 
 ---
 
-## 8. Estándares Técnicos
+## 8. Technical Standards
 
-### Convenciones de Código
+### Code Conventions
 
-| Aspecto | Estándar | Ejemplo |
+| Aspect | Standard | Example |
 |--------|----------|---------|
-| **PHP** | PSR-12 | `public function ask()` no `public function ask( )` |
-| **Validación** | Laravel Rules | `'message' => 'required\|string\|max:5000'` |
+| **PHP** | PSR-12 | `public function ask()` not `public function ask( )` |
+| **Validation** | Laravel Rules | `'message' => 'required\|string\|max:5000'` |
 | **HTTP** | RESTful | `POST /api/v1/chat/ask` |
-| **Respuestas** | JSON | `{"message": "...", "timestamp": "..."}` |
-| **Errores** | HTTP Status | 500 para errores del servidor |
+| **Responses** | JSON | `{"message": "...", "timestamp": "..."}` |
+| **Errors** | HTTP Status | 500 for server errors |
 
 ### Response Schema
 
-**Éxito (200)**:
+**Success (200)**:
 ```json
 {
   "message": "string (AI response)",
@@ -560,81 +560,81 @@ APP_KEY=base64:xxxxx...             # Existente
 
 ---
 
-## 9. Casos de Uso del Chatbot
+## 9. Chatbot Use Cases
 
-### 1. Crear Reserva
-**Usuario**: "¿Cómo creo una reserva?"
+### 1. Create Reservation
+**User**: "How do I create a reservation?"
 **Chatbot**: 
-> Para crear una reserva en SIMS:
-> 1. Ve a la sección "Mapa"
-> 2. Selecciona un vehículo disponible (azul)
-> 3. Elige fecha de inicio y fin
-> 4. Confirma la reserva
+> To create a reservation in SIMS:
+> 1. Go to the "Map" section
+> 2. Select an available vehicle (blue)
+> 3. Choose a start and end date
+> 4. Confirm the reservation
 > 
-> El sistema verifica automáticamente que el vehículo esté disponible en esas fechas.
+> The system automatically verifies that the vehicle is available on those dates.
 
-### 2. Modificar Reserva
-**Usuario**: "Necesito extender mi reserva hasta mañana"
+### 2. Modify Reservation
+**User**: "I need to extend my reservation until tomorrow"
 **Chatbot**:
-> Para modificar tu reserva:
-> 1. Ve a "Mis Reservas"
-> 2. Selecciona la reserva que quieres modificar
-> 3. Haz clic en "Modificar Fecha"
-> 4. Selecciona la nueva fecha de fin
-> 5. Confirma
+> To modify your reservation:
+> 1. Go to "My Reservations"
+> 2. Select the reservation you want to modify
+> 3. Click "Modify Date"
+> 4. Select the new end date
+> 5. Confirm
 >
-> Solo puedes extender si la reserva está en estado "pending" o "active".
+> You can only extend if the reservation is in "pending" or "active" status.
 
-### 3. Cancelar Reserva
-**Usuario**: "¿Se puede cancelar una reserva?"
+### 3. Cancel Reservation
+**User**: "Can a reservation be cancelled?"
 **Chatbot**:
-> Sí, puedes cancelar desde "Mis Reservas":
-> 1. Selecciona la reserva
-> 2. Haz clic en "Cancelar Reserva"
-> 3. Confirma la cancelación
+> Yes, you can cancel from "My Reservations":
+> 1. Select the reservation
+> 2. Click "Cancel Reservation"
+> 3. Confirm the cancellation
 >
-> Nota: Solo es posible si está en estado "pending" y no ha comenzado todavía.
+> Note: This is only possible if it is in "pending" status and has not started yet.
 
 ---
 
-## 10. Diferencias: Desarrollo vs Producción
+## 10. Differences: Development vs Production
 
 ### Development
 ```
 Frontend URL: http://proba.localhost:3000
 Backend URL: http://proba.localhost:8000
-Proxy: Vite proxy redirige /api → Backend
-Token: Desde localStorage (testing)
+Proxy: Vite proxy redirects /api → Backend
+Token: From localStorage (testing)
 Logs: Stdout + storage/logs/laravel.log
 ```
 
-### Producción
+### Production
 ```
 Frontend URL: https://sims.com
 Backend URL: https://api.sims.com
-CORS: Configurado en config/cors.php
-Token: Sanctum token desde login
-Logs: only storage/logs/laravel.log (rotated)
-Rate Limiting: throttle middleware activo
+CORS: Configured in config/cors.php
+Token: Sanctum token from login
+Logs: Only storage/logs/laravel.log (rotated)
+Rate Limiting: Throttle middleware active
 ```
 
 ---
 
-## 11. Resumen de Archivos Creados/Modificados
+## 11. Summary of Created/Modified Files
 
-| Archivo | Tipo | Cambio |
+| File | Type | Change |
 |---------|------|--------|
-| `app/Http/Controllers/Api/ChatController.php` | Created | 107 líneas - Controller principal |
-| `routes/tenant.php` | Modified | +1 línea - Route POST /api/v1/chat/ask |
-| `.env` | Modified | +2 líneas - GROQ_API_KEY, GROQ_MODEL |
-| `resources/js/components/ChatWidget.vue` | Created | 150 líneas - Frontend component |
-| `vite.config.js` | Modified | +proxy config para desarrollo |
+| `app/Http/Controllers/Api/ChatController.php` | Created | 107 lines - Main controller |
+| `routes/tenant.php` | Modified | +1 line - Route POST /api/v1/chat/ask |
+| `.env` | Modified | +2 lines - GROQ_API_KEY, GROQ_MODEL |
+| `resources/js/components/ChatWidget.vue` | Created | 150 lines - Frontend component |
+| `vite.config.js` | Modified | +proxy config for development |
 
 ---
 
 ## 12. Testing
 
-### Test Manual via cURL
+### Manual Test via cURL
 
 ```bash
 # Test via Docker
@@ -643,18 +643,18 @@ docker exec sims_api curl -s -X POST https://api.groq.com/openai/v1/chat/complet
   -H "Content-Type: application/json" \
   -d '{
     "model": "openai/gpt-oss-120b",
-    "messages": [{"role": "user", "content": "hola"}],
+    "messages": [{"role": "user", "content": "hello"}],
     "max_tokens": 50
   }' | python3 -m json.tool
 ```
 
-**Response esperada**:
+**Expected response**:
 ```json
 {
   "choices": [{
     "message": {
       "role": "assistant",
-      "content": "¡Hola! ¿En qué puedo ayudarte hoy?"
+      "content": "Hello! How can I help you today?"
     }
   }],
   "usage": {
@@ -664,7 +664,7 @@ docker exec sims_api curl -s -X POST https://api.groq.com/openai/v1/chat/complet
 }
 ```
 
-### Test desde Postman
+### Test from Postman
 
 1. **URL**: `http://proba.localhost:8000/api/v1/chat/ask`
 2. **Method**: POST
@@ -676,57 +676,57 @@ docker exec sims_api curl -s -X POST https://api.groq.com/openai/v1/chat/complet
 4. **Body**:
    ```json
    {
-     "message": "¿Cómo creo una reserva?"
+     "message": "How do I create a reservation?"
    }
    ```
 
 ---
 
-## 13. Mejoras Futuras
+## 13. Future Improvements
 
-### Nivel 1 (Fácil)
-- [ ] Historial de chat persistente en DB
-- [ ] Tipeo indicador en frontend
-- [ ] Avatar del asistente
-- [ ] Temas claro/oscuro
+### Level 1 (Easy)
+- [ ] Persistent chat history in DB
+- [ ] Typing indicator on frontend
+- [ ] Assistant avatar
+- [ ] Light/dark themes
 
-### Nivel 2 (Medio)
-- [ ] Context awareness (última reserva del usuario)
-- [ ] Sugerencias de acciones rápidas ("Ver mis reservas", "Nueva reserva")
-- [ ] Feedback de respuesta 
-- [ ] Analytics (preguntas frecuentes)
+### Level 2 (Medium)
+- [ ] Context awareness (user's last reservation)
+- [ ] Quick action suggestions ("View my reservations", "New reservation")
+- [ ] Response feedback
+- [ ] Analytics (frequently asked questions)
 
-### Nivel 3 (Avanzado)
-- [ ] Integración con actions (crear reserva directamente)
-- [ ] Multi-idioma automático
-- [ ] Fine-tuning del modelo con datos SIMS
-- [ ] Análisis de sentimiento
+### Level 3 (Advanced)
+- [ ] Action integration (create reservation directly)
+- [ ] Automatic multi-language support
+- [ ] Fine-tuning the model with SIMS data
+- [ ] Sentiment analysis
 
 ---
 
-## 14. Conclusión
+## 14. Conclusion
 
-**¿Cómo funciona todo junto?**
+**How does it all work together?**
 
-1. **Usuario autenticado** llega a SIMS
-2. **Ve widget de chatbot** en esquina inferior derecha
-3. **Escribe pregunta** sobre cómo usar la plataforma
-4. **Frontend valida** y envía mensaje con token Sanctum
-5. **Backend recibe**, construye contexto personalizado
-6. **Groq recibe** messages array + system prompt
-7. **Modelo genera** respuesta considerando funcionalidades SIMS
-8. **Backend retorna** respuesta formateada
-9. **Frontend muestra** respuesta en conversación
-10. **Usuario ve** ayuda contextual y accionable
+1. **Authenticated user** arrives at SIMS
+2. **Sees chatbot widget** in the bottom-right corner
+3. **Types a question** about how to use the platform
+4. **Frontend validates** and sends message with Sanctum token
+5. **Backend receives** it and builds personalized context
+6. **Groq receives** messages array + system prompt
+7. **Model generates** response considering SIMS functionalities
+8. **Backend returns** formatted response
+9. **Frontend displays** response in the conversation
+10. **User sees** contextual and actionable help
 
-**Stack Final**:
+**Final Stack**:
 - Backend: Laravel 11 + Sanctum + HTTP client
 - Frontend: Vue.js + fetch API
 - AI: Groq (openai/gpt-oss-120b)
-- Database: Context info del usuario (name, email)
-- Performance: ~100-150ms por request
+- Database: User context info (name, email)
+- Performance: ~100-150ms per request
 
-**Costo**: $0 (API Groq es gratis)
-**Velocidad**:  76ms modelo + 15-20ms overhead = ~100ms total
-**Escalabilidad**: Rate-limiting puede aplicarse fácilmente
-**Mantenibilidad**: Código limpio, documentado, fácil de extender
+**Cost**: $0 (Groq API is free)
+**Speed**:  76ms model + 15-20ms overhead = ~100ms total
+**Scalability**: Rate-limiting can be applied easily
+**Maintainability**: Clean, documented code, easy to extend
