@@ -1,34 +1,33 @@
 
-# CANVIS D'IDENTITAT CORPORATIVA
+# Corporate Identity Changes
 
-Durant el procès de creació del software, vam demanar a l'equip d'ESARDI que ens creés una identitat corporativa, decidint colors, font de text i logotip.
+During the software development process, we requested the ESARDI team to create a corporate identity for us, including the selection of colors, typography, and a logo.
 
-A l'Sprint 5 ens van proporcionar el full d'estils i a l'Sprint 6 l'hem aplicat.
+The stylesheet was provided during Sprint 5, and we fully implemented it during Sprint 6.
 
-## Procès
+## Process
 
 ### style.css
 
-Per poder aplicar aquesta nova identitat corporativa hem fet canvis en l'arquitectura, ja que teniem els colors i estils hardcoded als documents.
-Hem centralitzat els estils en un document style.css, on hem definit totes les variables CSS dels dos temes que hem decidit utiltizar( Clar i Fosc), per a
-que els colors s'adapten automaticament.
+To successfully apply this new corporate identity, we had to make architectural changes, as colors and styles were previously hardcoded throughout the components.
+We centralized the styling by creating a main `style.css` file. In this file, we defined all CSS variables for the two themes we decided to support (Light and Dark), ensuring that colors adapt automatically based on the active theme.
 
-També hem establert regles globals de tipografia, com la font "switzer" i estils base per als elements HTML.
-
-### Tailwind.css
-
-Com utilitzem Tailwind, hem modificar l'arxiu tailwind.config.js, que serveix com a "pont" entre les variables definides al arxiu style.css i Taliwind CSS.
-Aquí hem definit les classes amb les variables que volem que utilitzi cadascuna.
+We also established global typography rules, setting the "Switzer" font as the default, along with base styles for standard HTML elements.
 
 
-### Aplicació de les classes als elements
+### tailwind.config.js
 
-Per últim hem canviat els estils hardcoded a les classes dels elements per les noves classes.
+Since we use Tailwind CSS, we updated the `tailwind.config.js` file. This configuration acts as a bridge between the custom CSS variables defined in `style.css` and the Tailwind utility framework.
+Within this file, we mapped our custom variables to Tailwind's theme configuration, creating standard classes that utilize our new design system.
 
+### Applying Classes to Elements
 
-## Canvis personals
+Finally, we went through our UI components and replaced the old, hardcoded styles and raw CSS with the newly configured Tailwind classes, standardizing the implementation across the entire project.
 
-Per millorar l'apartat visual hem afegir hovers als botons, per fer-los més grans o afegir un petit canvi de color.
-Hem afegir blur o transparència als login o register.
-I per últim, com hem mencionat anteriorment, hem decidit afegir un switch per canviar entre el mode clar i fosc, per millorar l'experiència dels usuaris.
+## Custom Enhancements
+
+To further enhance the visual experience, we added custom interactive touches:
+- **Hover effects**: We added hover states to interactive elements like buttons, incorporating slight scaling interactions and subtle color shifts.
+- **Glassmorphism**: We introduced blur effects and transparency to the login and registration pages for a more modern look.
+- **Theme Switcher**: As mentioned earlier, we built a toggle switch allowing users to seamlessly transition between Light and Dark modes, significantly improving accessibility and overall user experience.
 
