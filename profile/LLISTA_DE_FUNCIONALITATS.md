@@ -1,18 +1,23 @@
 # 🔐 Funcionalitats del sistema – explicació simple
 
-Aquest document explica **de manera molt fàcil** què pot fer cada tipus d’usuari dins del sistema.
+Aquest document explica **de manera molt fàcil** què pot fer cada tipus d'usuari dins del sistema.
 
 ---
 
 ## 👤 Usuari
 
-👉 És el client normal de l’aplicació.
+👉 És el client normal de l'aplicació.
 
-✔ Pot registrar-se, iniciar sessió i canviar la seva contrasenya.  
-✔ Pot veure els vehicles disponibles.  
-✔ Pot crear reserves.  
-✔ Pot veure, modificar o cancel·lar **només les seves pròpies reserves**.  
+✔ Pot registrar-se, iniciar sessió i canviar la seva contrasenya.
+✔ Pot actualitzar el seu perfil.
+✔ Pot veure els vehicles disponibles i el seu calendari d'ocupació.
+✔ Pot crear reserves i pagar via Stripe.
+✔ Pot renovar les seves reserves.
+✔ Pot veure, modificar o cancel·lar **només les seves pròpies reserves**.
 ✔ Pot veure i crear els seus propis tickets.
+✔ Pot enviar i rebre missatges en els seus tickets.
+✔ Pot veure geofences en el mapa.
+✔ Pot usar el chatbot.
 
 ❌ No pot gestionar altres usuaris ni el sistema.
 
@@ -22,12 +27,16 @@ Aquest document explica **de manera molt fàcil** què pot fer cada tipus d’us
 - `POST /api/v1/auth/register`
 - `POST /api/v1/auth/login`
 - `POST /api/v1/auth/logout`
+- `POST /api/v1/auth/logout-all` *(tancar totes les sessions)*
 - `GET /api/v1/auth/me`
+- `PATCH /api/v1/auth/me` *(actualitzar perfil)*
 - `POST /api/v1/auth/change-password`
 
 🚙 VEHICLES
 - `GET /api/v1/vehicles`
 - `GET /api/v1/vehicles/{id}`
+- `GET /api/v1/vehicles-calendar` *(vehicles amb calendari d'ocupació)*
+- `GET /api/v1/disponibilitat/{id}` *(disponibilitat d'un vehicle)*
 
 📅 RESERVES
 - `GET /api/v1/reservations` *(només pròpies)*
@@ -36,11 +45,24 @@ Aquest document explica **de manera molt fàcil** què pot fer cada tipus d’us
 - `PUT /api/v1/reservations/{id}` *(només pròpia)*
 - `DELETE /api/v1/reservations/{id}` *(cancel·lar pròpia)*
 - `GET /api/v1/reservations/user/{userId}` *(només el seu ID)*
+- `GET /api/v1/reservations/check-availability` *(comprovar disponibilitat)*
+- `POST /api/v1/reservations/checkout` *(iniciar pagament Stripe)*
+- `POST /api/v1/reservations/{id}/renewal-intent` *(renovar reserva via Stripe)*
 
 🎫 TICKETS
 - `GET /api/v1/tickets` *(només propis)*
 - `GET /api/v1/tickets/{id}` *(només propi)*
 - `POST /api/v1/tickets`
+- `GET /api/v1/tickets/user/{userId}` *(els seus tickets)*
+- `GET /api/v1/tickets/{ticket}/messages` *(historial de missatges)*
+- `POST /api/v1/tickets/{ticket}/messages` *(enviar missatge)*
+
+🗺️ GEOFENCES *(només lectura)*
+- `GET /api/v1/geofences`
+- `GET /api/v1/geofences/{id}`
+
+🤖 CHATBOT
+- `POST /api/v1/chat/ask`
 
 ---
 
@@ -51,37 +73,29 @@ Aquest document explica **de manera molt fàcil** què pot fer cada tipus d’us
 Té tot el que pot fer un usuari i, a més:
 
 ### 👥 Usuaris
-✔ Veure i crear usuaris.  
-✔ Modificar usuaris.  
+✔ Veure, crear, modificar i eliminar usuaris.
 ❌ No pot eliminar administradors ni super administradors.
 
 ### 🚙 Vehicles
-✔ Crear, modificar i eliminar vehicles.  
-✔ Veure reserves d’un vehicle.  
+✔ Crear, modificar i eliminar vehicles.
+✔ Veure reserves d'un vehicle.
 ✔ Actualitzar la ubicació del vehicle.
+✔ Sincronitzar la disponibilitat de tots els vehicles.
 
 ### 📅 Reserves
-✔ Veure totes les reserves.  
-✔ Canviar l’estat d’una reserva.
+✔ Veure totes les reserves.
+✔ Canviar l'estat d'una reserva.
 
 ### 🎫 Tickets
-✔ Gestionar tickets:  
-- Assignar-los.  
-- Canviar estat.  
-- Modificar o eliminar.
+✔ Gestionar tickets:
+- Modificar i eliminar.
+- Assignar-los.
+- Canviar estat.
 
 ### 🌍 Geofencing
-✔ Veure zones geogràfiques controlades.  
-✔ Revisar registres de vehicles dins de zones.  
-✔ Comprovar si un vehicle està dins d’una zona.
-
-### 🔧 Control del sistema
-✔ Veure logs del sistema.  
-✔ Bloquejar comptes d’usuaris normals.  
-✔ Restablir contrasenyes.  
-✔ Veure estadístiques del sistema.  
-✔ Reassignar vehicles si hi ha problemes.
-
+✔ Crear, modificar i eliminar zones geogràfiques.
+✔ Revisar registres de vehicles dins de zones.
+✔ Comprovar si un vehicle està dins d'una zona.
 
 ### Endpoints
 
@@ -90,7 +104,7 @@ Té tot el que pot fer un usuari i, a més:
 - `GET /api/v1/users/{id}`
 - `POST /api/v1/users`
 - `PUT /api/v1/users/{id}`
-- ❌ No pot eliminar admins o super admins
+- `DELETE /api/v1/users/{id}` *(no pot eliminar admins o super admins)*
 
 🚙 VEHICLES
 - `GET /api/v1/vehicles`
@@ -100,6 +114,7 @@ Té tot el que pot fer un usuari i, a més:
 - `DELETE /api/v1/vehicles/{id}`
 - `GET /api/v1/vehicles/{id}/reservations`
 - `PATCH /api/v1/vehicles/{id}/location`
+- `POST /api/v1/vehicles/sync-all-availability`
 
 📅 RESERVES
 - `GET /api/v1/reservations`
@@ -118,68 +133,75 @@ Té tot el que pot fer un usuari i, a més:
 🗺️ GEOFENCING
 - `GET /api/v1/geofences`
 - `GET /api/v1/geofences/{id}`
+- `POST /api/v1/geofences`
+- `PUT /api/v1/geofences/{id}`
+- `DELETE /api/v1/geofences/{id}`
 - `GET /api/v1/geofences/{id}/logs`
 - `POST /api/v1/geofences/check-vehicle`
+
 ---
 
 ## 👑 Super Admin
 
-👉 És l'administrador  de totes les Companyies (Tenants)
+👉 És l'administrador de totes les Companyies (Tenants).
 
-✔ Crear, modificar i eliminar administradors i super administradors.  
-✔ Crear companyies.  
-✔ Modificar companyies.  
-✔ Eliminar companyies.
-
+✔ Iniciar sessió al seu panell propi.
+✔ Crear i eliminar superadministradors.
+✔ Crear, modificar i eliminar companyies (tenants).
 
 ### Endpoints
 
-👥 ADMINISTRADORS
-- `GET /api/v1/admins`
-- `GET /api/v1/admins/{id}`
-- `POST /api/v1/admins`
-- `PUT /api/v1/admins/{id}`
-- `DELETE /api/v1/admins/{id}`
+🔑 AUTENTICACIÓ SUPERADMIN
+- `POST /api/v1/superadmin/auth/login`
+- `GET /api/v1/superadmin/auth/me`
+- `POST /api/v1/superadmin/auth/logout`
 
 👥 SUPERADMINISTRADORS
-- `GET /api/v1/superadmins`
-- `GET /api/v1/superadmins/{id}`
-- `POST /api/v1/superadmins`
-- `PUT /api/v1/superadmins/{id}`
-- `DELETE /api/v1/superadmins/{id}`
+- `GET /api/v1/superadmin/admins`
+- `POST /api/v1/superadmin/admins`
+- `DELETE /api/v1/superadmin/admins/{id}`
 
-🏢 COMPANYIES
-- `GET /api/v1/companies`
-- `GET /api/v1/companies/{id}`
-- `POST /api/v1/companies`
-- `PUT /api/v1/companies/{id}`
-- `DELETE /api/v1/companies/{id}`
+🏢 COMPANYIES (TENANTS)
+- `GET /api/v1/superadmin/tenants`
+- `GET /api/v1/superadmin/tenants/{id}`
+- `POST /api/v1/superadmin/tenants`
+- `PUT /api/v1/superadmin/tenants/{id}`
+- `DELETE /api/v1/superadmin/tenants/{id}`
+
+---
+
+## 💳 Stripe Webhooks
+
+Gestionats internament pel sistema:
+- `POST /api/v1/stripe/webhook` *(confirmació de pagaments i renovacions)*
 
 ---
 
 # 📊 Matriu Resum de Permisos
 
-### LLEGENDA  
-✅ Total: Accés complet.  
-👤 Parcial: Només sobre dades pròpies.  
-❌ Cap: Sense accés.  
+### LLEGENDA
+✅ Total: Accés complet.
+👤 Parcial: Només sobre dades pròpies.
+❌ Cap: Sense accés.
 
-| Funcionalitat / Recurs           | Usuari  | Admin   | Super Admin |
-|----------------------------------|:-------:|:-------:|:-----------:|
-| Autenticació (Login/Register)    | ✅      | ✅       | ✅       |
-| Veure Vehicles                   | ✅      | ✅       | ❌       |
-| Gestionar Vehicles (CRUD)        | ❌      | ✅       | ❌       |
-| Crear/Gestionar Reserves         | 👤      | ✅       | ❌       |
-| Gestionar Tickets (Incidències)  | 👤      | ✅       | ❌       |
-| Geofencing i Logs Operatius      | ❌      | ✅       | ❌       |
-| Gestionar Usuaris (Clients)      | ❌      | ✅       | ❌       |
-| Gestionar Administradors         | ❌      | ❌       | ✅       |
-| Gestionar Super Administradors   | ❌      | ❌       | ✅       |
-| Gestionar Companyies (Tenants)   | ❌      | ❌       | ✅       |
+| Funcionalitat / Recurs              | Usuari | Admin | Super Admin |
+|-------------------------------------|:------:|:-----:|:-----------:|
+| Autenticació (Login/Register)       | ✅     | ✅    | ✅          |
+| Actualitzar perfil                  | ✅     | ✅    | ❌          |
+| Veure Vehicles                      | ✅     | ✅    | ❌          |
+| Gestionar Vehicles (CRUD)           | ❌     | ✅    | ❌          |
+| Crear Reserves i Pagar (Stripe)     | 👤     | ✅    | ❌          |
+| Renovar Reserves (Stripe)           | 👤     | ✅    | ❌          |
+| Gestionar Tickets (Incidències)     | 👤     | ✅    | ❌          |
+| Missatgeria en Tickets              | 👤     | ✅    | ❌          |
+| Veure Geofences (mapa)              | ✅     | ✅    | ❌          |
+| Gestionar Geofences (CRUD + logs)   | ❌     | ✅    | ❌          |
+| Chatbot                             | ✅     | ✅    | ❌          |
+| Gestionar Usuaris (Clients)         | ❌     | ✅    | ❌          |
+| Gestionar Superadministradors       | ❌     | ❌    | ✅          |
+| Gestionar Companyies (Tenants)      | ❌     | ❌    | ✅          |
 
 ---
 
-
-**Versió:** 1.0  
-**Última actualització:** 26/02/2026
-
+**Versió:** 2.0
+**Última actualització:** 08/05/2026
