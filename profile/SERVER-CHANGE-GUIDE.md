@@ -2,6 +2,19 @@
 
 This guide explains what to change when moving the backend to a new server: IPs, GitHub Actions secrets, and SSH keys (who owns them, where they go).
 
+## Current server (as of May 2026)
+
+| Parameter | Value |
+|-----------|-------|
+| Public IP | `185.13.77.175` |
+| Internal IP (school network) | `192.168.110.243` |
+| SSH port | `1205` |
+| SSH user | `jilsoftwares` |
+| App path | `/var/www/sims-back` |
+| GitHub Actions secret `DEPLOY_HOST` | `185.13.77.175` |
+| GitHub Actions secret `DEPLOY_PORT` | `1205` |
+| GitHub Actions secret `DEPLOY_USER` | `jilsoftwares` |
+
 ## 1) What typically changes
 
 - Server IP or hostname.
