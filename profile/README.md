@@ -1,8 +1,21 @@
-# Contributing to Blink
+# Contributing to fLEETLY
 
 Guidelines for contributors to the Blink project (Frontend & Backend).
 
 ---
+WEBS:
+
+LANDINGPAGE:
+
+https://jilsoftwares.deltahost.asix2.iesmontsia.cat/
+
+SUPERADMIN:
+
+https://jilsoftwares.deltahost.asix2.iesmontsia.cat/login
+
+TENANT:
+
+https://prova.jilsoftwares.deltahost.asix2.iesmontsia.cat/admin/reservations
 
 ## Frontend
 
