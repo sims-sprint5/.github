@@ -15,7 +15,7 @@ https://jilsoftwares.deltahost.asix2.iesmontsia.cat/login
 
 TENANT:
 
-https://prova.jilsoftwares.deltahost.asix2.iesmontsia.cat/admin/reservations
+https://prova.jilsoftwares.deltahost.asix2.iesmontsia.cat/login
 
 ## Frontend
 
