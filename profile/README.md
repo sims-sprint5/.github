@@ -1,4 +1,4 @@
-# Contributing to fLEETLY
+# Contributing to FLEETLY
 
 Guidelines for contributors to the Blink project (Frontend & Backend).
 
