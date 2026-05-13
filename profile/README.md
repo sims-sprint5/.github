@@ -3,6 +3,10 @@
 Guidelines for contributors to the Blink project (Frontend & Backend).
 
 ---
+SITES:
+
+https://sites.google.com/iesmontsia.org/equip3
+
 WEBS:
 
 LANDINGPAGE:
